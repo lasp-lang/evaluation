@@ -582,7 +582,7 @@ generate_executions_average_plot({Types, Times, ToAverage}, EvalId) ->
     %% Compute average convergence time
     AverageConvergenceTime = round(lists:sum(ConvergenceTimes) / length(ConvergenceTimes)),
 
-    PlotDir = root_plot_dir() ++ "/" ++ EvalId ++ "/average/",
+    PlotDir = root_plot_dir() ++ "/" ++ EvalId ++ "/",
     filelib:ensure_dir(PlotDir),
 
     InputFiles = write_average_to_files(Map1, PlotDir),
