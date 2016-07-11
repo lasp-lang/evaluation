@@ -74,12 +74,12 @@ generate_plots(EvalIds) ->
     OutputFile = output_file(PlotDir, "multi-mode"),
     %% Convergence time not supported yet on multi-mode plot
     Result = run_gnuplot(InputFiles, Titles, OutputFile, -1),
-    ct:pal("Generating multi-mode plot ~p. Output: ~p", [OutputFile, Result]),
+    io:format("Generating multi-mode plot ~p. Output: ~p", [OutputFile, Result]),
 
     OutputFilePS = output_file(PlotDir, "multi-mode-ps"),
     %% Convergence time not supported yet on multi-mode plot
     ResultPS = run_gnuplot(InputFilesPS, TitlesPS, OutputFilePS, -1),
-    ct:pal("Generating multi-mode-ps plot ~p. Output: ~p", [OutputFilePS, ResultPS]),
+    io:format("Generating multi-mode-ps plot ~p. Output: ~p", [OutputFilePS, ResultPS]),
 
     %% Remove input files
     delete_files(InputFiles),
@@ -87,10 +87,10 @@ generate_plots(EvalIds) ->
 
 %% @private
 generate_plot(EvalDir, EvalId, EvalTimestamp) ->
-    ct:pal("Will analyse the following directory: ~p", [EvalDir]),
+    io:format("Will analyse the following directory: ~p", [EvalDir]),
 
     LogFiles = only_csv_files(EvalDir),
-    ct:pal("Will analyse the following logs: ~p", [LogFiles]),
+    io:format("Will analyse the following logs: ~p", [LogFiles]),
 
     {Map, Types, Times, ConvergenceTimes} = lists:foldl(
         fun(File, {Map0, Types0, Times0, ConvergenceTimes0}) ->
@@ -114,16 +114,16 @@ generate_plot(EvalDir, EvalId, EvalTimestamp) ->
     ),
 
     Types1 = lists:delete(convergence, Types),
-    ct:pal("Types found: ~p", [Types1]),
+    io:format("Types found: ~p", [Types1]),
 
     %% `ConvergenceTime` is the max of all `ConvergenceTimes`
     TimeZero = lists:min(Times),
     ConvergenceTime = lists:max(ConvergenceTimes) - TimeZero,
-    ct:pal("Convergence time: ~p", [ConvergenceTime]),
+    io:format("Convergence time: ~p", [ConvergenceTime]),
 
     %% Assume unknown logs with last known values
     Map1 = assume_unknown_logs(Types1, Times, TimeZero, Map),
-    ct:pal("Unknown logs assumed!"),
+    io:format("Unknown logs assumed!"),
 
     %% Write average in files (one file per type) to `PlotDir`
     PlotDir = root_plot_dir() ++ "/"
@@ -332,7 +332,7 @@ generate_per_node_plot(Map, PlotDir) ->
     %% This plot does not show the convergence time per node,
     %% thus the -1
     Result = run_gnuplot(InputFiles, Titles, OutputFile, -1),
-    ct:pal("Generating per node plot ~p. Output: ~p", [OutputFile, Result]),
+    io:format("Generating per node plot ~p. Output: ~p", [OutputFile, Result]),
 
     %% Remove input files
     delete_files(InputFiles).
@@ -389,13 +389,13 @@ node_name(FileLogPath) ->
 generate_nodes_average_plot(Types, Times, Map, ConvergenceTime, PlotDir) ->
     %% Do the average of `Map1`
     TypeToTimeAndBytes = nodes_average(Types, Times, Map),
-    ct:pal("Average computed!"),
+    io:format("Average computed!"),
 
     InputFiles = write_average_to_files(TypeToTimeAndBytes, PlotDir),
     Titles = get_titles(Types),
     OutputFile = output_file(PlotDir, "average"),
     Result = run_gnuplot(InputFiles, Titles, OutputFile, ConvergenceTime),
-    ct:pal("Generating average plot ~p. Output: ~p", [OutputFile, Result]),
+    io:format("Generating average plot ~p. Output: ~p", [OutputFile, Result]),
 
     %% Remove input files
     delete_files(InputFiles),
@@ -589,7 +589,7 @@ generate_executions_average_plot({Types, Times, ToAverage}, EvalId) ->
     Titles = get_titles(Types),
     OutputFile = output_file(PlotDir, "average"),
     Result = run_gnuplot(InputFiles, Titles, OutputFile, AverageConvergenceTime),
-    ct:pal("Generating average plot of all executions ~p. Output: ~p", [OutputFile, Result]),
+    io:format("Generating average plot of all executions ~p. Output: ~p", [OutputFile, Result]),
 
     lists:foldl(
         fun(N, TitlesToInputFiles) ->
@@ -676,7 +676,7 @@ run_gnuplot(InputFiles, Titles, OutputFile, ConvergenceTime) ->
                   ++ "outputname='" ++ OutputFile ++ "'; "
                   ++ "inputnames='" ++ join_filenames(InputFiles) ++ "'; "
                   ++ "titles='" ++  join_titles(Titles) ++ "'\" " ++ gnuplot_file(),
-    %ct:pal("~p", [Command]),
+    %io:format("~p", [Command]),
     os:cmd(Command).
 
 %% @private
