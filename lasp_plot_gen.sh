@@ -12,23 +12,23 @@ main(_) ->
         fun(Simulation) ->
           SimulationDir = root_log_dir() ++ "/" ++ Simulation,
           EvalIds = only_dirs(SimulationDir),
-          generate_plots(SimulationDir, EvalIds)
+          generate_plots(Simulation, EvalIds)
         end,
         Simulations
     ).
 
 %% @doc Generate plots.
-generate_plots(SimulationDir, EvalIds) ->
+generate_plots(Simulation, EvalIds) ->
     TitlesToInputFiles = lists:foldl(
         fun(EvalId, Acc) ->
-            EvalIdDir = SimulationDir ++ "/" ++ EvalId,
+            EvalIdDir = root_log_dir() ++ "/" ++ Simulation ++ "/" ++ EvalId,
             EvalTimestamps = only_dirs(EvalIdDir),
 
             T = lists:foldl(
                 fun(EvalTimestamp, {_Types0, Times0, ToAverage0}) ->
                     EvalDir = EvalIdDir ++ "/" ++ EvalTimestamp,
                     {Types1, TypeToTimesAndBytes, ConvergenceTime}
-                        = generate_plot(EvalDir, EvalId, EvalTimestamp),
+                        = generate_plot(EvalDir, Simulation, EvalId, EvalTimestamp),
 
                     Times2 = ordsets:union(Times0, get_times(TypeToTimesAndBytes)),
                     ToAverage1 = orddict:store(
@@ -43,7 +43,7 @@ generate_plots(SimulationDir, EvalIds) ->
                 EvalTimestamps
             ),
 
-            TitlesToInputFiles = generate_executions_average_plot(T, EvalId),
+            TitlesToInputFiles = generate_executions_average_plot(T, Simulation, EvalId),
             lists:append(Acc, TitlesToInputFiles)
 
         end,
@@ -76,7 +76,7 @@ generate_plots(SimulationDir, EvalIds) ->
         TitlesToInputFiles
     ),
     
-    PlotDir = root_plot_dir() ++ "/",
+    PlotDir = root_plot_dir() ++ "/" ++ Simulation ++ "/",
 
     OutputFile = output_file(PlotDir, "multi-mode"),
     %% Convergence time not supported yet on multi-mode plot
@@ -93,7 +93,7 @@ generate_plots(SimulationDir, EvalIds) ->
     delete_files(InputFilesPS).
 
 %% @private
-generate_plot(EvalDir, EvalId, EvalTimestamp) ->
+generate_plot(EvalDir, Simulation, EvalId, EvalTimestamp) ->
     io:format("Will analyse the following directory: ~p~n", [EvalDir]),
 
     LogFiles = only_csv_files(EvalDir),
@@ -134,6 +134,7 @@ generate_plot(EvalDir, EvalId, EvalTimestamp) ->
 
     %% Write average in files (one file per type) to `PlotDir`
     PlotDir = root_plot_dir() ++ "/"
+           ++ Simulation ++ "/"
            ++ EvalId ++ "/"
            ++ EvalTimestamp ++ "/",
     filelib:ensure_dir(PlotDir),
@@ -539,7 +540,7 @@ get_times(TypeToTimesAndBytes) ->
     ).
 
 %% @doc Average all executions
-generate_executions_average_plot({Types, Times, ToAverage}, EvalId) ->
+generate_executions_average_plot({Types, Times, ToAverage}, Simulation, EvalId) ->
     Empty = create_empty_dict_type_to_time_and_bytes(Types, Times),
     TimestampToLastKnown = lists:foldl(
         fun(Timestamp, Acc) ->
@@ -589,7 +590,9 @@ generate_executions_average_plot({Types, Times, ToAverage}, EvalId) ->
     %% Compute average convergence time
     AverageConvergenceTime = round(lists:sum(ConvergenceTimes) / length(ConvergenceTimes)),
 
-    PlotDir = root_plot_dir() ++ "/" ++ EvalId ++ "/",
+    PlotDir = root_plot_dir() ++ "/"
+           ++ Simulation ++ "/"
+           ++ EvalId ++ "/",
     filelib:ensure_dir(PlotDir),
 
     InputFiles = write_average_to_files(Map1, PlotDir),
