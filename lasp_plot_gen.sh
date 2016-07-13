@@ -7,14 +7,21 @@ main(_) ->
     os:cmd("rm -rf " ++ root_plot_dir()),
 
     %% Generate plots
-    EvalIds = only_dirs(root_log_dir()),
-    generate_plots(EvalIds).
+    Simulations = only_dirs(root_log_dir()),
+    lists:foreach(
+        fun(Simulation) ->
+          SimulationDir = root_log_dir() ++ "/" ++ Simulation,
+          EvalIds = only_dirs(SimulationDir),
+          generate_plots(EvalIds)
+        end,
+        Simulations
+    ).
 
 %% @doc Generate plots.
-generate_plots(EvalIds) ->
+generate_plots(SimulationDir, EvalIds) ->
     TitlesToInputFiles = lists:foldl(
         fun(EvalId, Acc) ->
-            EvalIdDir = root_log_dir() ++ "/" ++ EvalId,
+            EvalIdDir = SimulationDir ++ "/" ++ EvalId,
             EvalTimestamps = only_dirs(EvalIdDir),
 
             T = lists:foldl(
@@ -45,7 +52,7 @@ generate_plots(EvalIds) ->
     ),
 
     {{Titles, InputFiles}, {TitlesPS, InputFilesPS}} = orddict:fold(
-				fun(Title, InputFile, {{Titles0, InputFiles0}, {TitlesPS0, InputFilesPS0}}) ->
+        fun(Title, InputFile, {{Titles0, InputFiles0}, {TitlesPS0, InputFilesPS0}}) ->
             case re:run(InputFile, ".*based_ps.*") of
                 {match, _} ->
                     {
