@@ -12,7 +12,7 @@ main(_) ->
         fun(Simulation) ->
           SimulationDir = root_log_dir() ++ "/" ++ Simulation,
           EvalIds = only_dirs(SimulationDir),
-          generate_plots(EvalIds)
+          generate_plots(SimulationDir, EvalIds)
         end,
         Simulations
     ).
