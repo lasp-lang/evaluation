@@ -663,9 +663,7 @@ get_titles(Types) ->
 
 %% @private
 get_title(aae_send)   -> "AAE Send";
-get_title(delta_ack)  -> "Delta Ack";
 get_title(delta_send) -> "Delta Send";
-get_title(broadcast)  -> "Broadcast";
 get_title(peer_to_peer_state_based_with_aae)              -> "P2P - State Based";
 get_title(peer_to_peer_state_based_with_aae_and_tree)     -> "P2P - State Based + tree";
 get_title(peer_to_peer_delta_based_with_aae)              -> "P2P - Delta based";
