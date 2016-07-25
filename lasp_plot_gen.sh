@@ -666,18 +666,18 @@ get_title(aae_send)   -> "AAE Send";
 get_title(delta_ack)  -> "Delta Ack";
 get_title(delta_send) -> "Delta Send";
 get_title(broadcast)  -> "Broadcast";
-get_title(peer_to_peer_state_based_with_aae)              -> "P2P | State Based";
-get_title(peer_to_peer_state_based_with_aae_and_tree)     -> "P2P | State Based + tree";
-get_title(peer_to_peer_delta_based_with_aae)              -> "P2P | Delta based";
-get_title(peer_to_peer_state_based_ps_with_aae)           -> "P2P | State Based PS";
-get_title(peer_to_peer_state_based_ps_with_aae_and_tree)  -> "P2P | State Based PS + tree";
-get_title(peer_to_peer_delta_based_ps_with_aae)           -> "P2P | Delta based PS";
-get_title(client_server_state_based_with_aae)             -> "C-S | State Based";
-get_title(client_server_state_based_with_aae_and_tree)    -> "C-S | State Based + tree";
-get_title(client_server_delta_based_with_aae)             -> "C-S | Delta based";
-get_title(client_server_state_based_ps_with_aae)          -> "C-S | State Based PS";
-get_title(client_server_state_based_ps_with_aae_and_tree) -> "C-S | State Based PS + tree";
-get_title(client_server_delta_based_ps_with_aae)          -> "C-S | Delta based PS".
+get_title(peer_to_peer_state_based_with_aae)              -> "P2P - State Based";
+get_title(peer_to_peer_state_based_with_aae_and_tree)     -> "P2P - State Based + tree";
+get_title(peer_to_peer_delta_based_with_aae)              -> "P2P - Delta based";
+get_title(peer_to_peer_state_based_ps_with_aae)           -> "P2P - State Based PS";
+get_title(peer_to_peer_state_based_ps_with_aae_and_tree)  -> "P2P - State Based PS + tree";
+get_title(peer_to_peer_delta_based_ps_with_aae)           -> "P2P - Delta based PS";
+get_title(client_server_state_based_with_aae)             -> "CS - State Based";
+get_title(client_server_state_based_with_aae_and_tree)    -> "CS - State Based + tree";
+get_title(client_server_delta_based_with_aae)             -> "CS - Delta based";
+get_title(client_server_state_based_ps_with_aae)          -> "CS - State Based PS";
+get_title(client_server_state_based_ps_with_aae_and_tree) -> "CS - State Based PS + tree";
+get_title(client_server_delta_based_ps_with_aae)          -> "CS - Delta based PS".
 
 %% @private
 run_gnuplot(InputFiles, Titles, OutputFile, ConvergenceTime) ->
