@@ -690,7 +690,7 @@ run_gnuplot(InputFiles, Titles, OutputFile, ConvergenceTime) ->
                   ++ "outputname='" ++ OutputFile ++ "'; "
                   ++ "inputnames='" ++ join_filenames(InputFiles) ++ "'; "
                   ++ "titles='" ++  join_titles(Titles) ++ "'\" " ++ gnuplot_file(),
-    io:format("~p~n~n", [Command]),
+    %%io:format("~p~n~n", [Command]),
     os:cmd(Command).
 
 %% @private
