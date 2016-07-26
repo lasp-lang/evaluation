@@ -55,6 +55,8 @@ set datafile missing '0'
 #                "10^-4" 0.0001)
 # set mytics 10
 
+set yrange [0:*]
+
 # set xrange [0:60]
 # set yrange [0.5:64]
 
