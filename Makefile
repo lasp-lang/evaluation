@@ -3,4 +3,4 @@
 check: plots
 
 plots:
-	./lasp_plot_gen.sh
+	./lasp_transmission_plot.sh

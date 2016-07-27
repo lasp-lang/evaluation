@@ -3,18 +3,28 @@
 -author("Vitor Enes Duarte <vitorenesduarte@gmail.com>").
 
 main(_) ->
+    ValidDirectories = ordsets:from_list(["ad_counter", "music_festival"]),
+
     %% Delete plot directory
     os:cmd("rm -rf " ++ root_plot_dir()),
 
+    %% Filter out invalid directories
+    Simulations0 = only_dirs(root_log_dir()),
+    Simulations1 = lists:filter(
+        fun(Simulation) ->
+          ordsets:is_element(Simulation, ValidDirectories)
+        end,
+        Simulations0
+    ),
+            
     %% Generate plots
-    Simulations = only_dirs(root_log_dir()),
     lists:foreach(
         fun(Simulation) ->
           SimulationDir = root_log_dir() ++ "/" ++ Simulation,
           EvalIds = only_dirs(SimulationDir),
           generate_plots(Simulation, EvalIds)
         end,
-        Simulations
+        Simulations1
     ).
 
 %% @doc Generate plots.
