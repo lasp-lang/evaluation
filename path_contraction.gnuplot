@@ -30,4 +30,4 @@ set yrange [0:*]
 # These titles should be separated by "_" and here we replace by " "
 pretty(title) = system("echo ".title." | sed 's/_/ /g'")
 
-plot for [i=0:words(inputnames) - 1] word(inputnames, i + 1) title pretty(word(titles, i + 1)) with linespoints ls i + 1
+plot for [i=0:words(inputnames) - 1] word(inputnames, i + 1) title pretty(word(titles, i + 1)) with linespoints ls i + 1 smooth bezier
