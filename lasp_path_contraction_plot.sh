@@ -83,7 +83,6 @@ generate_plot(EvalDir, Simulation, EvalId, EvalTimestamp) ->
         LogFiles
     ),
 
-
     %% Write average in files (one file per type) to `PlotDir`
     PlotDir = root_plot_dir() ++ "/"
            ++ Simulation ++ "/"
@@ -221,7 +220,6 @@ generate_nodes_average_plot(Map0, PlotDir) ->
     IterationToValue = nodes_average(Map0),
     %%io:format("Average computed!~n~n"),
 
-    
     InputFile = PlotDir ++ "node_average.csv", 
     Title = "Node Average",
     OutputFile = output_file(PlotDir, "node_average"),
@@ -268,7 +266,7 @@ range(N) -> range(N - 1) ++ [N].
 
 %% @private
 create_empty_iteration_to_value(Iterations) ->
-		lists:foldl(
+    lists:foldl(
         fun(Iteration, IterationToValue) ->
             orddict:store(Iteration, 0, IterationToValue)
         end,
@@ -295,9 +293,9 @@ generate_executions_average_plot(ToAverage, Simulation, EvalId) ->
     IterationToValue0 = create_empty_iteration_to_value(Iterations),
 
     IterationToValue1 = orddict:fold(
-				fun(_EvalTimestamp, IterationToValue, Result0) ->
+        fun(_EvalTimestamp, IterationToValue, Result0) ->
         		orddict:fold(
-								fun(Iteration, Time, Result1) ->
+                fun(Iteration, Time, Result1) ->
                     CurrentValue = orddict:fetch(Iteration, Result1),
                     orddict:store(Iteration, CurrentValue + Time, Result1)
                 end,
