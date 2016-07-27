@@ -38,7 +38,7 @@ plot for [i=0:words(inputnames) - 1] word(inputnames, i + 1) title pretty(word(t
 
 unset table
 
-max_y(file) = system("cat temp.dat | grep -vE ^# | cut -d' ' -f 4 | sort -nu | tail -n 1")
+max_y(file) = system("cat ".temp_file." | grep -vE ^# | cut -d' ' -f 4 | sort -nu | tail -n 1")
 
 set yrange[0:max_y(temp_file)]
 
