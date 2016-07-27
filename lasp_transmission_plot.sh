@@ -5,9 +5,6 @@
 main(_) ->
     ValidDirectories = ordsets:from_list(["ad_counter", "music_festival"]),
 
-    %% Delete plot directory
-    os:cmd("rm -rf " ++ root_plot_dir()),
-
     %% Filter out invalid directories
     Simulations0 = only_dirs(root_log_dir()),
     Simulations1 = lists:filter(
