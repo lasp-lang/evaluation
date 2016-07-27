@@ -26,8 +26,20 @@ set key top right
 
 set yrange [0:*]
 
+temp_file = '.temp'
+
+set table temp_file
+
 # Titles with spaces are not allowed
 # These titles should be separated by "_" and here we replace by " "
 pretty(title) = system("echo ".title." | sed 's/_/ /g'")
 
 plot for [i=0:words(inputnames) - 1] word(inputnames, i + 1) title pretty(word(titles, i + 1)) with linespoints ls i + 1 smooth bezier
+
+unset table
+
+max_y(file) = system("cat temp.dat | grep -vE ^# | cut -d' ' -f 4 | sort -nu | tail -n 1")
+
+set yrange[0:max_y(temp_file)]
+
+replot
