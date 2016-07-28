@@ -251,7 +251,7 @@ nodes_average(Map) ->
                     orddict:store(Iteration, CurrentValue + NodeValue, Result1)
                 end,
                 Result0,
-                range(Iterations)
+                lists:seq(1, Iterations)
             )
         end,
         IterationToValue0,
@@ -261,17 +261,13 @@ nodes_average(Map) ->
     IterationToValue1.
 
 %% @private
-range(0) -> [];
-range(N) -> range(N - 1) ++ [N].
-
-%% @private
 create_empty_iteration_to_value(Iterations) ->
     lists:foldl(
         fun(Iteration, IterationToValue) ->
             orddict:store(Iteration, 0, IterationToValue)
         end,
         orddict:new(),
-        range(Iterations)
+        lists:seq(1, Iterations)
     ).
     
 %% @private
