@@ -3,7 +3,7 @@
 -author("Vitor Enes Duarte <vitorenesduarte@gmail.com>").
 
 main(_) ->
-    ValidDirectories = ordsets:from_list(["ad_counter", "music_festival"]),
+    ValidDirectories = ordsets:from_list(["ad_counter"]),
 
     %% Filter out invalid directories
     Simulations0 = only_dirs(root_log_dir()),
