@@ -22,7 +22,7 @@ set output outputname
 set xlabel "Iterations"
 set ylabel "Time (microseconds)"
 
-set key top right
+set key bottom right
 
 set yrange [0:*]
 
