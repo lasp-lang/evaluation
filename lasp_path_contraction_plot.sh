@@ -333,8 +333,9 @@ generate_executions_average_plot(ToAverage, Simulation, EvalId) ->
     InputFile.
 
 %% @private
-get_title(contraction)   -> "Contraction";
-get_title(no_contraction)   -> "No Contraction".
+get_title(contraction) -> "Contraction";
+get_title(no_contraction) -> "No Contraction";
+get_title(contraction_with_reads) -> "Contraction with random reads".
 
 %% @private
 run_gnuplot(InputFiles, Titles, OutputFile) ->
