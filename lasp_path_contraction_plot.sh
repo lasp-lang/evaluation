@@ -364,7 +364,7 @@ join_filenames(InputFiles) ->
 join_titles(Titles) ->
     Line = lists:foldl(
         fun(Elem, Acc) ->
-            % "transmission.gnuplot" does not support titles with spaces
+            % "path_contraction.gnuplot" does not support titles with spaces
             % But it converts all the "_" in the titles to " "
             Acc ++ re:replace(Elem, " ", "_", [global, {return, list}])
                 ++ " "
