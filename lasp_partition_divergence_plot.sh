@@ -146,11 +146,11 @@ root_plot_dir() ->
 
 %% @private
 gnuplot_file() ->
-    "divergence.gnuplot".
+    "partition_divergence.gnuplot".
 
 %% @private
 output_file(Simulation) ->
-    root_plot_dir() ++ "/" ++ Simulation ++ "/divergence.pdf".
+    root_plot_dir() ++ "/" ++ Simulation ++ "/partition_divergence.pdf".
 
 %% @private
 only_dirs(Dir) ->
@@ -195,7 +195,7 @@ join_filenames(InputFiles) ->
 join_titles(Titles) ->
     Line = lists:foldl(
         fun(Elem, Acc) ->
-            % "divergence.gnuplot" does not support titles with spaces
+            % "partition_divergence.gnuplot" does not support titles with spaces
             % But it converts all the "_" in the titles to " "
             Acc ++ re:replace(Elem, " ", "_", [global, {return, list}])
                 ++ " "
