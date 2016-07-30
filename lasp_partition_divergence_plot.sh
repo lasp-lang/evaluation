@@ -91,7 +91,6 @@ average(Simulation, EvalIds) ->
 get_partition_probability(EvalId) ->
     Tokens = string:tokens(EvalId, "_"),
     PartitionProbability = lists:last(Tokens),
-    io:format("~p~n", [PartitionProbability]),
     list_to_integer(PartitionProbability).
 
 %% @private
