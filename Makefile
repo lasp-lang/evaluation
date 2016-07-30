@@ -2,7 +2,7 @@
 
 check: plots
 
-plots: clean transmission contraction divergence
+plots: clean transmission contraction divergence partition-divergence
 
 clean:
 	rm -rf plots/
@@ -15,3 +15,6 @@ contraction:
 
 divergence:
 	./lasp_divergence_plot.sh
+
+partition-divergence:
+	./lasp_partition_divergence_plot.sh
