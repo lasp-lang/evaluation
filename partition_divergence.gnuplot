@@ -18,10 +18,10 @@ set style line 2 lc rgb "#00A000" lw 2 pt 7 ps 0.5
 set style line 3 lc rgb "#5060D0" lw 2 pt 7 ps 0.5
 
 set output outputname
-set xlabel "Partition Probability"
+set xlabel "Partition Probability At Syncronization Time (%)"
 set ylabel "Divergence"
 
-set key bottom right
+set key top left
 
 # set yrange [0:*]
 
