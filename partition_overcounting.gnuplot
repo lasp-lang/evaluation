@@ -19,7 +19,7 @@ set style line 3 lc rgb "#5060D0" lw 2 pt 7 ps 0.5
 
 set output outputname
 set xlabel "Partition Probability At Syncronization Time (%)"
-set ylabel "Divergence"
+set ylabel "Overcounted (%)"
 
 set key top left
 
