@@ -3,7 +3,7 @@
 -author("Vitor Enes Duarte <vitorenesduarte@gmail.com>").
 
 main(_) ->
-    ValidDirectories = ordsets:from_list(["ad_counter_divergence"]),
+    ValidDirectories = ordsets:from_list(["ad_counter_overcounting"]),
 
     %% Filter out invalid directories
     Simulations0 = only_dirs(root_log_dir()),
@@ -97,9 +97,9 @@ get_client_number(EvalId) ->
 average_executions(EvalIdDir, EvalTimestamps) ->
     Sum = lists:foldl(
         fun(EvalTimestamp, Acc) ->
-            File = EvalIdDir ++ "/" ++ EvalTimestamp ++ "/divergence",
-            Divergence = get_divergence(File),
-            Acc + Divergence
+            File = EvalIdDir ++ "/" ++ EvalTimestamp ++ "/overcounting",
+            Overcounting = get_overcounting(File),
+            Acc + Overcounting
         end,
         0,
         EvalTimestamps
@@ -108,7 +108,7 @@ average_executions(EvalIdDir, EvalTimestamps) ->
     Sum / length(EvalTimestamps).
 
 %% @private
-get_divergence(FilePath) ->
+get_overcounting(FilePath) ->
     %% Open log file
     {ok, FileDescriptor} = file:open(FilePath, [read]),
     Line = io:get_line(FileDescriptor, ''),
@@ -122,8 +122,8 @@ write_to_file(Simulation, Name, Map) ->
     file:write_file(InputFile, "", [write]),
 
     lists:foreach(
-        fun({Clients, Divergence}) ->
-            append_to_file(InputFile, Clients, Divergence)
+        fun({Clients, Overcounting}) ->
+            append_to_file(InputFile, Clients, Overcounting)
         end,
         Map
     ),
@@ -131,8 +131,8 @@ write_to_file(Simulation, Name, Map) ->
     InputFile.
 
 %% @private
-append_to_file(InputFile, Clients, Divergence) ->
-    Line = io_lib:format("~w,~w\n", [Clients, Divergence]),
+append_to_file(InputFile, Clients, Overcounting) ->
+    Line = io_lib:format("~w,~w\n", [Clients, Overcounting]),
     file:write_file(InputFile, Line, [append]).
 
 %% @private
@@ -145,11 +145,11 @@ root_plot_dir() ->
 
 %% @private
 gnuplot_file() ->
-    "divergence.gnuplot".
+    "overcounting.gnuplot".
 
 %% @private
 output_file(Simulation) ->
-    root_plot_dir() ++ "/" ++ Simulation ++ "/divergence.pdf".
+    root_plot_dir() ++ "/" ++ Simulation ++ "/overcounting.pdf".
 
 %% @private
 only_dirs(Dir) ->
@@ -194,7 +194,7 @@ join_filenames(InputFiles) ->
 join_titles(Titles) ->
     Line = lists:foldl(
         fun(Elem, Acc) ->
-            % "divergence.gnuplot" does not support titles with spaces
+            % "overcounting.gnuplot" does not support titles with spaces
             % But it converts all the "_" in the titles to " "
             Acc ++ re:replace(Elem, " ", "_", [global, {return, list}])
                 ++ " "

@@ -2,7 +2,7 @@
 
 check: plots
 
-plots: clean transmission contraction divergence partition-divergence
+plots: clean transmission contraction overcounting partition-overcounting
 
 clean:
 	rm -rf plots/
@@ -13,8 +13,8 @@ transmission:
 contraction:
 	./lasp_path_contraction_plot.sh
 
-divergence:
-	./lasp_divergence_plot.sh
+overcounting:
+	./lasp_overcounting_plot.sh
 
-partition-divergence:
-	./lasp_partition_divergence_plot.sh
+partition-overcounting:
+	./lasp_partition_overcounting_plot.sh
