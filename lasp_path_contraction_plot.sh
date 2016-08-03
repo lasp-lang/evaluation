@@ -3,7 +3,9 @@
 -author("Vitor Enes Duarte <vitorenesduarte@gmail.com>").
 
 main(_) ->
-    ValidDirectories = ordsets:from_list(["path_contraction"]),
+    ValidDirectories = ordsets:from_list(["path_contraction",
+                                          "sql_simple_queries",
+                                          "sql_join_queries"]),
 
     %% Filter out invalid directories
     Simulations0 = only_dirs(root_log_dir()),
