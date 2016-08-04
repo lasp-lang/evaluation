@@ -5,6 +5,6 @@ script:
   - make check
 notifications:
   email: christopher.meiklejohn@gmail.com
-  slack: lasp-lang:hiPRNnbUa3zdGrrXZfGRAF7D
+  slack: lasp-lang:F4jrdXWYUyUUpbwmBFVT1D27
   irc: "irc.freenode.org#lasp-lang"
 sudo: required
