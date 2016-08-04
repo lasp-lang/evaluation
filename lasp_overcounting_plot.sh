@@ -26,6 +26,7 @@ main(_) ->
               generate_plots(Simulation ++ "/" ++ Dir, EvalIds)
             end,
             LocalAndDCOS
+          )
         end,
         Simulations1
     ).
