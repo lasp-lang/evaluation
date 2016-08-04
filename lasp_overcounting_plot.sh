@@ -18,8 +18,14 @@ main(_) ->
     lists:foreach(
         fun(Simulation) ->
           SimulationDir = root_log_dir() ++ "/" ++ Simulation,
-          EvalIds = only_dirs(SimulationDir),
-          generate_plots(Simulation, EvalIds)
+          LocalAndDCOS = only_dirs(SimulationDir),
+          lists:foreach(
+            fun(Dir) ->
+              Path = SimulationDir ++ "/" ++ Dir,
+              EvalIds = only_dirs(Path),
+              generate_plots(Simulation ++ "/" ++ Dir, EvalIds)
+            end,
+            LocalAndDCOS
         end,
         Simulations1
     ).
