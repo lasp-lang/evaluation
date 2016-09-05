@@ -447,8 +447,6 @@ nodes_average(Types, Times, Map) ->
         fun(_Node, Dict, Map1) ->
             orddict:fold(
                 fun(Time, Logs, Map2) ->
-                    %% Somehow it's possible to have, in the same time,
-                    %% logs of the same type
                     PerType = lists:foldl(
                         fun({Bytes, Type}, PerType0) ->
                             orddict:append(Type, Bytes, PerType0)
@@ -457,11 +455,17 @@ nodes_average(Types, Times, Map) ->
                         Logs
                     ),
 
-                    %% If that's the case, pick the maximum value
+                    %% If, for the same time, one node has
+                    %% logs of the same type, exit
                     lists:foldl(
                         fun({Type, BytesList}, Map3) ->
-                            Bytes = lists:max(BytesList),
-                            update_average_dict(Type, Time, Bytes, Map3)
+                            case length(BytesList) == 1 of
+                                true ->
+                                    Bytes = lists:nth(1, BytesList),
+                                    update_average_dict(Type, Time, Bytes, Map3);
+                                false ->
+                                    exit("Found logs of the same type in the same time")
+                            end
                         end,
                         Map2,
                         PerType
