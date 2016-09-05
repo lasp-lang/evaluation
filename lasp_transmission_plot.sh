@@ -447,12 +447,24 @@ nodes_average(Types, Times, Map) ->
         fun(_Node, Dict, Map1) ->
             orddict:fold(
                 fun(Time, Logs, Map2) ->
+                    %% Somehow it's possible to have, in the same time,
+                    %% logs of the same type
+                    PerType = lists:foldl(
+                        fun({Bytes, Type}, PerType0) ->
+                            orddict:append(Type, Bytes, PerType0)
+                        end,
+                        orddict:new(),
+                        Logs
+                    ),
+
+                    %% If that's the case, pick the maximum value
                     lists:foldl(
-                        fun({Bytes, Type}, Map3) ->
+                        fun({Type, BytesList}, Map3) ->
+                            Bytes = lists:max(BytesList),
                             update_average_dict(Type, Time, Bytes, Map3)
                         end,
                         Map2,
-                        Logs
+                        PerType
                     )
                 end,
                 Map1,
