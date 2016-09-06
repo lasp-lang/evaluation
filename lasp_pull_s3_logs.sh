@@ -17,4 +17,4 @@ aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
 aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
 
 ## Sync s3 bucket with local logs folder
-aws s3 sync s3://lasp-transmission-instrumentation-logs logs/
+aws s3 sync s3://lasp-instrumentation-logs logs/
