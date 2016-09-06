@@ -134,8 +134,7 @@ generate_plot(EvalDir, Simulation, EvalId, EvalTimestamp) ->
         LogFiles
     ),
 
-    Types1 = lists:delete(convergence, Types),
-    io:format("Types found: ~p~n~n", [Types1]),
+    io:format("Types found: ~p~n~n", [Types]),
 
     %% `ConvergenceTime` is the max of all `ConvergenceTimes`
     TimeZero = lists:min(Times),
@@ -143,7 +142,7 @@ generate_plot(EvalDir, Simulation, EvalId, EvalTimestamp) ->
     io:format("Convergence time: ~p~n~n", [ConvergenceTime]),
 
     %% Assume unknown logs with last known values
-    Map1 = assume_unknown_logs(Types1, Times, TimeZero, Map),
+    Map1 = assume_unknown_logs(Types, Times, TimeZero, Map),
     %%io:format("Unknown logs assumed!~n~n"),
 
     %% Write average in files (one file per type) to `PlotDir`
@@ -154,9 +153,9 @@ generate_plot(EvalDir, Simulation, EvalId, EvalTimestamp) ->
     filelib:ensure_dir(PlotDir),
 
     generate_per_node_plot(Map1, PlotDir),
-    TypeToTimesAndBytes = generate_nodes_average_plot(Types1, Times, Map1, ConvergenceTime, PlotDir),
+    TypeToTimesAndBytes = generate_nodes_average_plot(Types, Times, Map1, ConvergenceTime, PlotDir),
 
-    {Types1, TypeToTimesAndBytes, ConvergenceTime}.
+    {Types, TypeToTimesAndBytes, ConvergenceTime}.
 
 %% @private
 root_log_dir() ->
@@ -219,10 +218,13 @@ load_to_map(FilePath, Map) ->
             {TimeI, _} = string:to_integer(Time0),
             {BytesF, _} = string:to_float(Bytes0),
 
-            {Map2, ConvergenceTimes2} = case TypeA of
+            {Map2, Types2, ConvergenceTimes2} = case TypeA of
+                memory ->
+                    %% Ignore memory logs
+                    {Map0, Types0, ConvergenceTimes0};
                 convergence ->
                     ConvergenceTimes1 = ordsets:add_element(TimeI, ConvergenceTimes0),
-                    {Map0, ConvergenceTimes1};
+                    {Map0, Types0, ConvergenceTimes1};
                 _ ->
                     %% Get dictionary that maps time to logs of this file
                     TimeToLogs0 = case orddict:find(FilePath, Map0) of
@@ -238,15 +240,14 @@ load_to_map(FilePath, Map) ->
 
                     %% Update dictionary `Map0` with new value `TimeToLogs1`
                     Map1 = orddict:store(FilePath, TimeToLogs1, Map0),
-                    {Map1, ConvergenceTimes0}
+                    Types1 = ordsets:add_element(TypeA, Types0),
+                    {Map1, Types1, ConvergenceTimes0}
             end,
 
-            %% Update set of types
-            Types1 = ordsets:add_element(TypeA, Types0),
             %% Update set of times
             Times1 = ordsets:add_element(TimeI, Times0),
 
-            {Map2, Types1, Times1, ConvergenceTimes2}
+            {Map2, Types2, Times1, ConvergenceTimes2}
         end,
         {Map, ordsets:new(), ordsets:new(), ordsets:new()},
         Lines
