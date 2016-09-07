@@ -92,12 +92,12 @@ generate_plots(Simulation, EvalIds) ->
     
     PlotDir = root_plot_dir() ++ "/" ++ Simulation ++ "/",
 
-    OutputFile = output_file(PlotDir, "multi-mode"),
+    OutputFile = output_file(PlotDir, "multi_mode"),
     %% Convergence time not supported yet on multi-mode plot
     Result = run_gnuplot(InputFiles, Titles, OutputFile, -1),
     io:format("Generating multi-mode plot ~p. Output: ~p~n~n", [OutputFile, Result]),
 
-    OutputFilePS = output_file(PlotDir, "multi-mode-ps"),
+    OutputFilePS = output_file(PlotDir, "multi_mode_ps"),
     %% Convergence time not supported yet on multi-mode plot
     ResultPS = run_gnuplot(InputFilesPS, TitlesPS, OutputFilePS, -1),
     io:format("Generating multi-mode-ps plot ~p. Output: ~p~n~n", [OutputFilePS, ResultPS]),
