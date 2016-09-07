@@ -2,13 +2,16 @@
 
 check: plots
 
-plots: clean transmission contraction overcounting partition-overcounting
+plots: clean transmission memory contraction overcounting partition-overcounting
 
 clean:
 	rm -rf plots/
 
 transmission:
 	./lasp_transmission_plot.sh
+
+memory:
+	./lasp_memory_plot.sh
 
 contraction:
 	./lasp_path_contraction_plot.sh
