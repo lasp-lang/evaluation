@@ -18,7 +18,7 @@ set border 3 back linestyle 80 # Remove border on top and right.  These
 # set xtics nomirror
 # set ytics nomirror
 
-#set log x
+#set log y
 #set mxtics 10    # Makes logscale look good.
 
 # Line styles: try to pick pleasing colors, rather
@@ -52,7 +52,7 @@ set datafile missing '0'
 #                "10^-4" 0.0001)
 # set mytics 10
 
-set yrange [0:*]
+set yrange [98:*]
 
 # set xrange [0:60]
 # set yrange [0.5:64]
@@ -64,4 +64,4 @@ pretty(title) = system("echo ".title." | sed 's/_/ /g'")
 # Input file contains comma-separated values fields
 set datafile separator ","
 
-plot for [i=0:words(inputnames) - 1] word(inputnames, i + 1) using 1:2 title pretty(word(titles, i + 1)) with linespoints ls i + 1
+plot for [i=0:words(inputnames) - 1] word(inputnames, i + 1) using 1:2 title pretty(word(titles, i + 1)) with linespoints ls i + 1 smooth bezier
