@@ -43,7 +43,7 @@ set output outputname
 set xlabel "Time in Seconds"
 set ylabel "MB Transmitted"
 
-set key bottom right
+set key left top
 
 set datafile missing '0'
 

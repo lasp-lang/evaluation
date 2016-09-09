@@ -40,7 +40,7 @@ set output outputname
 set xlabel "Time in Seconds"
 set ylabel "MB Stored"
 
-set key bottom right
+set key left top
 
 set datafile missing '0'
 
@@ -52,7 +52,7 @@ set datafile missing '0'
 #                "10^-4" 0.0001)
 # set mytics 10
 
-set yrange [98:*]
+set yrange [50:*]
 
 # set xrange [0:60]
 # set yrange [0.5:64]
