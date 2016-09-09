@@ -405,7 +405,7 @@ write_per_node_to_files(Map, PlotDir) ->
 %% @private
 node_name(FileLogPath) ->
     Tokens = string:tokens(FileLogPath, "\/\."),
-    NodeName = lists:nth(length(Tokens) - 1, Tokens),
+    NodeName = lists:nth(6, Tokens),
     re:replace(NodeName, "@", "_", [global, {return, list}]).
 
 %% @private
