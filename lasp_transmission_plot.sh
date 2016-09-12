@@ -113,13 +113,29 @@ generate_plot(EvalDir, Simulation, EvalId, EvalTimestamp) ->
     LogFiles = only_csv_files(EvalDir),
     %%io:format("Will analyse the following logs: ~p~n~n", [LogFiles]),
 
-    {Map, Types, Times, ConvergenceTimes} = lists:foldl(
-        fun(File, {Map0, Types0, Times0, ConvergenceTimes0}) ->
+    {ExtraMap, Types, ExtraTimes, ConvergenceTimes, StartTime} = lists:foldl(
+        fun(File, {Map0, Types0, Times0, ConvergenceTimes0, StartTime0}) ->
             FilePath = EvalDir ++ "/" ++ File,
 
             %% Load this file to the map
             %% Also get the types and times found on that log file
-            {Map1, Types1, Times1, ConvergenceTimes1} = load_to_map(FilePath, Map0),
+            {Map1, Types1, Times1, ConvergenceTimes1, StartTime1} = load_to_map(FilePath, Map0),
+
+            StartTime2 = case StartTime1 /= -1 of
+                true ->
+                    %% If we found the time
+                    case StartTime0 /= -1 of
+                        true ->
+                            %% If it was found before, there's a problem
+                            exit("Experiment start time found more than once");
+                        false ->
+                            ok
+                    end,
+                    StartTime1;
+                false ->
+                    %% If we haven't found it, keep the same value
+                    StartTime0
+            end,
 
             %% Update set of types
             Types2 = ordsets:union(Types0, Types1),
@@ -128,13 +144,37 @@ generate_plot(EvalDir, Simulation, EvalId, EvalTimestamp) ->
             %% Update set of convergence times
             ConvergenceTimes2 = ordsets:union(ConvergenceTimes0, ConvergenceTimes1),
 
-            {Map1, Types2, Times2, ConvergenceTimes2}
+            {Map1, Types2, Times2, ConvergenceTimes2, StartTime2}
         end,
-        {orddict:new(), ordsets:new(), ordsets:new(), ordsets:new()},
+        {orddict:new(), ordsets:new(), ordsets:new(), ordsets:new(), -1},
+        %% The -1 means the experiment start time has not been found
         LogFiles
     ),
 
+    io:format("Experiment start time: ~p~n~n", [StartTime]),
     io:format("Types found: ~p~n~n", [Types]),
+
+
+    %% Drop all logs before `StartTime'
+    Map = orddict:map(
+        fun(_Node, LogList) ->
+            orddict:filter(
+                fun(Time, _) ->
+                    Time >= StartTime
+                end,
+                LogList
+            )
+        end,
+        ExtraMap
+    ),
+
+    %% Drop all times before `StartTime'
+    Times = ordsets:filter(
+        fun(Time) ->
+            Time >= StartTime
+        end,
+        ExtraTimes
+    ),
 
     %% `ConvergenceTime` is the max of all `ConvergenceTimes`
     TimeZero = lists:min(Times),
@@ -152,7 +192,7 @@ generate_plot(EvalDir, Simulation, EvalId, EvalTimestamp) ->
            ++ EvalTimestamp ++ "/",
     filelib:ensure_dir(PlotDir),
 
-    generate_per_node_plot(Map1, PlotDir),
+    %%generate_per_node_plot(Map1, PlotDir),
     TypeToTimesAndBytes = generate_nodes_average_plot(Types, Times, Map1, ConvergenceTime, PlotDir),
 
     {Types, TypeToTimesAndBytes, ConvergenceTime}.
@@ -211,20 +251,22 @@ load_to_map(FilePath, Map) ->
     [_ | Lines] = read_lines(FilePath, FileDescriptor),
 
     lists:foldl(
-        fun(Line, {Map0, Types0, Times0, ConvergenceTimes0}) ->
+        fun(Line, {Map0, Types0, Times0, ConvergenceTimes0, StartTime0}) ->
             %% Parse log line
             [Type0, Time0, Bytes0] = string:tokens(Line, ",\n"),
             TypeA = list_to_atom(Type0),
             {TimeI, _} = string:to_integer(Time0),
             {BytesF, _} = string:to_float(Bytes0),
 
-            {Map2, Types2, ConvergenceTimes2} = case TypeA of
+            {Map2, Types2, ConvergenceTimes2, StartTime2} = case TypeA of
                 memory ->
                     %% Ignore memory logs
-                    {Map0, Types0, ConvergenceTimes0};
+                    {Map0, Types0, ConvergenceTimes0, StartTime0};
+                experiment_started ->
+                    {Map0, Types0, ConvergenceTimes0, TimeI};
                 convergence ->
                     ConvergenceTimes1 = ordsets:add_element(TimeI, ConvergenceTimes0),
-                    {Map0, Types0, ConvergenceTimes1};
+                    {Map0, Types0, ConvergenceTimes1, StartTime0};
                 _ ->
                     %% Get dictionary that maps time to logs of this file
                     TimeToLogs0 = case orddict:find(FilePath, Map0) of
@@ -241,15 +283,15 @@ load_to_map(FilePath, Map) ->
                     %% Update dictionary `Map0` with new value `TimeToLogs1`
                     Map1 = orddict:store(FilePath, TimeToLogs1, Map0),
                     Types1 = ordsets:add_element(TypeA, Types0),
-                    {Map1, Types1, ConvergenceTimes0}
+                    {Map1, Types1, ConvergenceTimes0, StartTime0}
             end,
 
             %% Update set of times
             Times1 = ordsets:add_element(TimeI, Times0),
 
-            {Map2, Types2, Times1, ConvergenceTimes2}
+            {Map2, Types2, Times1, ConvergenceTimes2, StartTime2}
         end,
-        {Map, ordsets:new(), ordsets:new(), ordsets:new()},
+        {Map, ordsets:new(), ordsets:new(), ordsets:new(), -1},
         Lines
     ).
 
