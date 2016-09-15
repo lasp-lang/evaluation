@@ -1,6 +1,10 @@
-# set terminal png transparent nocrop enhanced size 450,320 font "arial,8" 
-# set output 'histograms.8.png'
-set border 3 front lt black linewidth 1.000 dashtype solid
+# Note you need gnuplot 4.4 for the pdfcairo terminal.
+
+# set terminal pdfcairo font "Gill Sans,9" linewidth 4 rounded fontscale 1.0
+set terminal pdfcairo font "Gill Sans,7" linewidth 1 rounded fontscale 0.5
+
+
+set border 3 front linewidth 1.000
 set boxwidth 0.8 absolute
 set style fill   solid 1.00 noborder
 set grid nopolar
@@ -16,12 +20,16 @@ set title "Advertisement Impression Counter"
 set xlabel "(Client Number)" 
 set xlabel  offset character 0, -1, 0 font "" textcolor lt -1 norotate
 set ylabel "MB Transmitted" 
-set yrange [ 0.00000 : 900000. ] noreverse nowriteback
+set yrange [0:*]
+##set yrange [ 0.00000 : 900000. ] noreverse nowriteback
+
 set linetype 1 lc rgb "#A00000"
 set linetype 2 lc rgb "#00A000"
 set linetype 3 lc rgb "#5060D0"
 set linetype 4 lc rgb "#F25900"
-plot newhistogram "32", 'immigration.dat' using "32_s":xtic(1) t 'Server' lc 3, '' u "32_c" t 'Client' lc 4, \
+set datafile separator ","
+set output outputname
+plot newhistogram "32", inputname using "32_s":xtic(1) t 'Server' lc 3, '' u "32_c" t 'Client' lc 4, \
      newhistogram "64", '' u "64_s":xtic(1) t '' lc 3, '' u "64_c" t '' lc 4, \
      newhistogram "128", '' u "128_s":xtic(1) t '' lc 3, '' u "128_c" t '' lc 4, \
      newhistogram "256", '' u "256_s":xtic(1) t '' lc 3, '' u "256_c" t '' lc 4, \

@@ -41,32 +41,47 @@ generate_plots(Simulation, EvalIds) ->
             PartitionProbabilityIndex = length(Tokens),
             ClientNumber = lists:nth(ClientNumberIndex, Tokens),
             PartitionProbability = lists:nth(PartitionProbabilityIndex, Tokens),
+            HeavyClients = lists:nth(1, Tokens) == "code",
             Id = string:join(lists:sublist(Tokens, IdMaxIndex), "_"),
 
             case PartitionProbability of
                 "0" ->
-                    io:format("Analysing ~p~n", [EvalId]),
-                    EvalIdDir = root_log_dir() ++ "/" ++ Simulation ++ "/" ++ EvalId,
-                    EvalTimestamps = only_dirs(EvalIdDir),
+                    case HeavyClients of
+                        false ->
+                            io:format("Analysing ~p~n", [EvalId]),
+                            EvalIdDir = root_log_dir() ++ "/" ++ Simulation ++ "/" ++ EvalId,
+                            EvalTimestamps = only_dirs(EvalIdDir),
 
-                    T = lists:foldl(
-                        fun(EvalTimestamp, ToAverage0) ->
-                            EvalDir = EvalIdDir ++ "/" ++ EvalTimestamp,
-                            {ServerMB, ClientsMB} = get_server_and_clients_mb(EvalDir),
+                            T = lists:foldl(
+                                fun(EvalTimestamp, ToAverage0) ->
+                                    EvalDir = EvalIdDir ++ "/" ++ EvalTimestamp,
+                                    {ServerMB, ClientsMB} = get_server_and_clients_mb(EvalDir),
 
-                            orddict:store(
-                                EvalTimestamp,
-                                {ServerMB, ClientsMB},
-                                ToAverage0
-                            )
-                        end,
-                        orddict:new(),
-                        EvalTimestamps
-                    ),
+                                    orddict:store(
+                                        EvalTimestamp,
+                                        {ServerMB, ClientsMB},
+                                        ToAverage0
+                                    )
+                                end,
+                                orddict:new(),
+                                EvalTimestamps
+                            ),
 
-                    {ServerMBAvg, ClientsMBAvg} = average_server_and_clients_mb(T),
+                            {ServerMBAvg, ClientsMBAvg} = average_server_and_clients_mb(T),
 
-                    orddict:store({ClientNumber, Id}, {ServerMBAvg, ClientsMBAvg}, Acc);
+                            PerClients0 = case orddict:find(Id, Acc) of
+                                {ok, CPC} ->
+                                    CPC;
+                                error ->
+                                    orddict:new()
+                            end,
+
+                            PerClients1 = orddict:store(ClientNumber, {ServerMBAvg, ClientsMBAvg}, PerClients0),
+                            orddict:store(Id, PerClients1, Acc);
+                        true ->
+                            io:format("Ignoring ~p~n", [EvalId]),
+                            Acc
+                    end;
                 _ ->
                     io:format("Ignoring ~p~n", [EvalId]),
                     Acc
@@ -76,7 +91,74 @@ generate_plots(Simulation, EvalIds) ->
         EvalIds
     ),
 
-    io:format("~p~n", [Map]).
+    io:format("~p~n", [Map]),
+
+    PlotDir = root_plot_dir() ++ "/" ++ Simulation ++ "/",
+    filelib:ensure_dir(PlotDir),
+    InputFile = PlotDir ++ "transmission",
+    OutputFile = output_file(PlotDir, "transmission"),
+
+    Header = "ABCXYZ,32_s,32_c,64_s,64_c,128_s,128_c,256_s,256_c,512_s,512_c\n",
+    L1 = io_lib:format("cs_s,~w,~w,~w,~w,~w,~w,~w,~w,~w,~w\n",
+                       [
+                        element(1, orddict:fetch("32", orddict:fetch("client_server_state_based_with_aae", Map))),
+                        element(2, orddict:fetch("32", orddict:fetch("client_server_state_based_with_aae", Map))),
+                        element(1, orddict:fetch("64", orddict:fetch("client_server_state_based_with_aae", Map))),
+                        element(2, orddict:fetch("64", orddict:fetch("client_server_state_based_with_aae", Map))),
+                        element(1, orddict:fetch("128", orddict:fetch("client_server_state_based_with_aae", Map))),
+                        element(2, orddict:fetch("128", orddict:fetch("client_server_state_based_with_aae", Map))),
+                        0,
+                        0,
+                        0,
+                        0
+                       ]),
+    L2 = io_lib:format("cs_d,~w,~w,~w,~w,~w,~w,~w,~w,~w,~w\n",
+                       [
+                        element(1, orddict:fetch("32", orddict:fetch("client_server_delta_based_with_aae", Map))),
+                        element(2, orddict:fetch("32", orddict:fetch("client_server_delta_based_with_aae", Map))),
+                        element(1, orddict:fetch("64", orddict:fetch("client_server_delta_based_with_aae", Map))),
+                        element(2, orddict:fetch("64", orddict:fetch("client_server_delta_based_with_aae", Map))),
+                        element(1, orddict:fetch("128", orddict:fetch("client_server_delta_based_with_aae", Map))),
+                        element(2, orddict:fetch("128", orddict:fetch("client_server_delta_based_with_aae", Map))),
+                        0,
+                        0,
+                        0,
+                        0
+                       ]),
+    L3 = io_lib:format("p2p_s,~w,~w,~w,~w,~w,~w,~w,~w,~w,~w\n",
+                       [
+                        element(1, orddict:fetch("32", orddict:fetch("peer_to_peer_state_based_with_aae", Map))),
+                        element(2, orddict:fetch("32", orddict:fetch("peer_to_peer_state_based_with_aae", Map))),
+                        element(1, orddict:fetch("64", orddict:fetch("peer_to_peer_state_based_with_aae", Map))),
+                        element(2, orddict:fetch("64", orddict:fetch("peer_to_peer_state_based_with_aae", Map))),
+                        element(1, orddict:fetch("128", orddict:fetch("peer_to_peer_state_based_with_aae", Map))),
+                        element(2, orddict:fetch("128", orddict:fetch("peer_to_peer_state_based_with_aae", Map))),
+                        element(1, orddict:fetch("256", orddict:fetch("peer_to_peer_state_based_with_aae", Map))),
+                        element(2, orddict:fetch("256", orddict:fetch("peer_to_peer_state_based_with_aae", Map))),
+                        element(1, orddict:fetch("512", orddict:fetch("peer_to_peer_state_based_with_aae", Map))),
+                        element(2, orddict:fetch("512", orddict:fetch("peer_to_peer_state_based_with_aae", Map)))
+                       ]),
+    L4 = io_lib:format("p2p_d,~w,~w,~w,~w,~w,~w,~w,~w,~w,~w\n",
+                       [
+                        element(1, orddict:fetch("32", orddict:fetch("peer_to_peer_state_based_with_aae", Map))),
+                        element(2, orddict:fetch("32", orddict:fetch("peer_to_peer_state_based_with_aae", Map))),
+                        element(1, orddict:fetch("64", orddict:fetch("peer_to_peer_state_based_with_aae", Map))),
+                        element(2, orddict:fetch("64", orddict:fetch("peer_to_peer_state_based_with_aae", Map))),
+                        element(1, orddict:fetch("128", orddict:fetch("peer_to_peer_state_based_with_aae", Map))),
+                        element(2, orddict:fetch("128", orddict:fetch("peer_to_peer_state_based_with_aae", Map))),
+                        element(1, orddict:fetch("256", orddict:fetch("peer_to_peer_state_based_with_aae", Map))),
+                        element(2, orddict:fetch("256", orddict:fetch("peer_to_peer_state_based_with_aae", Map))),
+                        element(1, orddict:fetch("512", orddict:fetch("peer_to_peer_state_based_with_aae", Map))),
+                        element(2, orddict:fetch("512", orddict:fetch("peer_to_peer_state_based_with_aae", Map)))
+                       ]),
+    append_to_file(InputFile, Header),
+    append_to_file(InputFile, L1),
+    append_to_file(InputFile, L2),
+    append_to_file(InputFile, L3),
+    append_to_file(InputFile, L4),
+
+    Result = run_gnuplot(InputFile, OutputFile),
+    io:format("Generating transmission plot ~p. Output: ~p~n~n", [OutputFile, Result]).
 
 %% @private
 root_log_dir() ->
@@ -88,7 +170,7 @@ root_plot_dir() ->
 
 %% @private
 gnuplot_file() ->
-    "transmission.gnuplot".
+    "new_transmission.gnuplot".
 
 %% @private
 output_file(PlotDir, Name) ->
@@ -191,8 +273,7 @@ read_lines(FilePath, FileDescriptor) ->
     end.
 
 %% @private
-append_to_file(InputFile, Time, Bytes) ->
-    Line = io_lib:format("~w,~w\n", [Time, Bytes]),
+append_to_file(InputFile, Line) ->
     file:write_file(InputFile, Line, [append]).
 
 %% @doc Average all executions
@@ -208,33 +289,7 @@ average_server_and_clients_mb(ToAverage) ->
     {ServerMBSum / NumberOfExecutions, ClientsMBSum / NumberOfExecutions}.
 
 %% @private
-get_titles(Types) ->
-    lists:map(
-        fun(Type) ->
-            get_title(Type)
-        end,
-        Types
-    ).
-
-%% @private
-get_title(aae_send)   -> "AAE Send";
-get_title(delta_send) -> "Delta Send";
-get_title(broadcast) -> "Broadcast";
-get_title(peer_to_peer_state_based_with_aae)              -> "P2P - State Based";
-get_title(peer_to_peer_state_based_with_aae_and_tree)     -> "P2P - State Based + tree";
-get_title(peer_to_peer_delta_based_with_aae)              -> "P2P - Delta based";
-get_title(peer_to_peer_state_based_ps_with_aae)           -> "P2P - State Based PS";
-get_title(peer_to_peer_state_based_ps_with_aae_and_tree)  -> "P2P - State Based PS + tree";
-get_title(peer_to_peer_delta_based_ps_with_aae)           -> "P2P - Delta based PS";
-get_title(client_server_state_based_with_aae)             -> "CS - State Based";
-get_title(client_server_state_based_with_aae_and_tree)    -> "CS - State Based + tree";
-get_title(client_server_delta_based_with_aae)             -> "CS - Delta based";
-get_title(client_server_state_based_ps_with_aae)          -> "CS - State Based PS";
-get_title(client_server_state_based_ps_with_aae_and_tree) -> "CS - State Based PS + tree";
-get_title(client_server_delta_based_ps_with_aae)          -> "CS - Delta based PS".
-
-%% @private
-run_gnuplot(InputFiles, Titles, OutputFile, ConvergenceTime) ->
+run_gnuplot(InputFile, OutputFile) ->
     Bin = case os:getenv("MESOS_TASK_ID", "false") of
         "false" ->
             "gnuplot";
@@ -242,45 +297,7 @@ run_gnuplot(InputFiles, Titles, OutputFile, ConvergenceTime) ->
             "/usr/bin/gnuplot"
     end,
     Command = Bin ++ " -e \""
-                  ++ "convergence_time='" ++ integer_to_list(ConvergenceTime) ++ "'; "
                   ++ "outputname='" ++ OutputFile ++ "'; "
-                  ++ "inputnames='" ++ join_filenames(InputFiles) ++ "'; "
-                  ++ "titles='" ++  join_titles(Titles) ++ "'\" " ++ gnuplot_file(),
-    %%io:format("~p~n~n", [Command]),
+                  ++ "inputname='" ++  InputFile ++ "'\" " ++ gnuplot_file(),
+    io:format("~p~n~n", [Command]),
     os:cmd(Command).
-
-%% @private
-join_filenames(InputFiles) ->
-    Line = lists:foldl(
-        fun(Elem, Acc) ->
-            Acc ++ Elem
-                ++ " "
-        end,
-        "",
-        InputFiles
-    ),
-    string:strip(Line).
-
-%% @private
-join_titles(Titles) ->
-    Line = lists:foldl(
-        fun(Elem, Acc) ->
-            % "transmission.gnuplot" does not support titles with spaces
-            % But it converts all the "_" in the titles to " "
-            Acc ++ re:replace(Elem, " ", "_", [global, {return, list}])
-                ++ " "
-        end,
-        "",
-        Titles
-    ),
-    string:strip(Line).
-
-%% @private
-delete_files(Files) ->
-    lists:foreach(
-      fun(File) ->
-        ok = file:delete(File)
-      end,
-      Files
-    ).
-

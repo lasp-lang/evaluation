@@ -94,17 +94,18 @@ generate_plots(Simulation, EvalIds) ->
 
     OutputFile = output_file(PlotDir, "multi_mode"),
     %% Convergence time not supported yet on multi-mode plot
-    Result = run_gnuplot(InputFiles, Titles, OutputFile, -1),
+    Result = run_gnuplot(InputFiles, Titles, OutputFile, -100),
     io:format("Generating multi-mode plot ~p. Output: ~p~n~n", [OutputFile, Result]),
 
     OutputFilePS = output_file(PlotDir, "multi_mode_ps"),
     %% Convergence time not supported yet on multi-mode plot
-    ResultPS = run_gnuplot(InputFilesPS, TitlesPS, OutputFilePS, -1),
+    ResultPS = run_gnuplot(InputFilesPS, TitlesPS, OutputFilePS, -100),
     io:format("Generating multi-mode-ps plot ~p. Output: ~p~n~n", [OutputFilePS, ResultPS]),
 
     %% Remove input files
-    delete_files(InputFiles),
-    delete_files(InputFilesPS).
+    %%delete_files(InputFiles),
+    %%delete_files(InputFilesPS).
+    ok.
 
 %% @private
 generate_plot(EvalDir, Simulation, EvalId, EvalTimestamp) ->
@@ -121,7 +122,7 @@ generate_plot(EvalDir, Simulation, EvalId, EvalTimestamp) ->
             %% Also get the types and times found on that log file
             {Map1, Types1, Times1, ConvergenceTimes1, StartTime1} = load_to_map(FilePath, Map0),
 
-            StartTime2 = case StartTime1 /= -1 of
+            {Map2, StartTime2} = case StartTime1 /= -1 of
                 true ->
                     %% If we found the time
                     case StartTime0 /= -1 of
@@ -129,12 +130,12 @@ generate_plot(EvalDir, Simulation, EvalId, EvalTimestamp) ->
                             %% If it was found before, there's a problem
                             exit("Experiment start time found more than once");
                         false ->
-                            ok
-                    end,
-                    StartTime1;
+                            {orddict:erase(FilePath, Map1), StartTime1}
+                            %%{Map1, StartTime1}
+                    end;
                 false ->
                     %% If we haven't found it, keep the same value
-                    StartTime0
+                    {Map1, StartTime0}
             end,
 
             %% Update set of types
@@ -144,7 +145,7 @@ generate_plot(EvalDir, Simulation, EvalId, EvalTimestamp) ->
             %% Update set of convergence times
             ConvergenceTimes2 = ordsets:union(ConvergenceTimes0, ConvergenceTimes1),
 
-            {Map1, Types2, Times2, ConvergenceTimes2, StartTime2}
+            {Map2, Types2, Times2, ConvergenceTimes2, StartTime2}
         end,
         {orddict:new(), ordsets:new(), ordsets:new(), ordsets:new(), -1},
         %% The -1 means the experiment start time has not been found
@@ -396,7 +397,7 @@ generate_per_node_plot(Map, PlotDir) ->
     OutputFile = output_file(PlotDir, "per_node"),
     %% This plot does not show the convergence time per node,
     %% thus the -1
-    Result = run_gnuplot(InputFiles, Titles, OutputFile, -1),
+    Result = run_gnuplot(InputFiles, Titles, OutputFile, -100),
     io:format("Generating per node plot ~p. Output: ~p~n~n", [OutputFile, Result]),
 
     %% Remove input files
@@ -737,6 +738,7 @@ get_titles(Types) ->
 %% @private
 get_title(aae_send)   -> "AAE Send";
 get_title(delta_send) -> "Delta Send";
+get_title(broadcast) -> "Broadcast";
 get_title(peer_to_peer_state_based_with_aae)              -> "P2P - State Based";
 get_title(peer_to_peer_state_based_with_aae_and_tree)     -> "P2P - State Based + tree";
 get_title(peer_to_peer_delta_based_with_aae)              -> "P2P - Delta based";
