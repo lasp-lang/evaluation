@@ -16,6 +16,8 @@ set border 3 back linestyle 80
 set style line 1 lc rgb "#A00000" lw 2 pt 7 ps 0.5
 set style line 2 lc rgb "#00A000" lw 2 pt 7 ps 0.5
 set style line 3 lc rgb "#5060D0" lw 2 pt 7 ps 0.5
+set style line 4 lc rgb "#F25900" lw 2 pt 7 ps 0.5
+
 
 set output outputname
 set xlabel "Partition Probability At Syncronization Time (%)"
@@ -23,7 +25,8 @@ set ylabel "Overcounted (%)"
 
 set key top left
 
-# set yrange [0:*]
+set yrange [0:*]
+set xrange [20:*]
 
 # Titles with spaces are not allowed
 # These titles should be separated by "_" and here we replace by " "

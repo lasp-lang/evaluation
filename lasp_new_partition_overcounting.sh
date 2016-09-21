@@ -41,12 +41,12 @@ generate_plots(Simulation, EvalIds) ->
             PartitionProbabilityIndex = length(Tokens),
             ClientNumber = lists:nth(ClientNumberIndex, Tokens),
             PartitionProbability = lists:nth(PartitionProbabilityIndex, Tokens),
-            HeavyClients = lists:nth(1, Tokens) == "code",
             Id = string:join(lists:sublist(Tokens, IdMaxIndex), "_"),
 
             case ClientNumber of
-                "128" ->
+                "64" ->
                     case Id == "client_server_delta_based_with_aae" orelse
+                         Id == "code_client_server_delta_based_with_aae" orelse
                          Id == "peer_to_peer_delta_based_with_aae" orelse 
                          Id == "code_peer_to_peer_delta_based_with_aae" of
                         true ->
@@ -132,23 +132,6 @@ only_dirs(Dir) ->
     ).
 
 %% @private
-only_csv_files(LogDir) ->
-    {ok, LogFiles} = file:list_dir(LogDir),
-
-    %% Ignore not csv files
-    lists:filter(
-        fun(Elem) ->
-            case re:run(Elem, ".*.csv") of
-                {match, _} ->
-                    true;
-                nomatch ->
-                    false
-            end
-        end,
-        LogFiles
-    ).
-
-%% @private
 get_overcounting(FilePath) ->
     %% Open log file
     {ok, FileDescriptor} = file:open(FilePath, [read]),
@@ -177,7 +160,12 @@ write_to_files(PlotDir, Map) ->
 
             lists:foreach(
                 fun({Partitions, Overcounting}) ->
-                    append_to_file(InputFile, Partitions, Overcounting)
+                    case Partitions of
+                        "0" ->
+                            ok;
+                        _ ->
+                            append_to_file(InputFile, Partitions, Overcounting)
+                    end
                 end,
                 PartitionsToOvercounting
             ),
@@ -190,6 +178,7 @@ write_to_files(PlotDir, Map) ->
 
 %% @private
 get_title("client_server_delta_based_with_aae") -> "Client Server";
+get_title("code_client_server_delta_based_with_aae") -> "Client Server with Heavy Clients";
 get_title("peer_to_peer_delta_based_with_aae") -> "Peer-to-Peer";
 get_title("code_peer_to_peer_delta_based_with_aae") -> "Peer-to-Peer with Heavy Clients".
 

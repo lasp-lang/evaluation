@@ -98,59 +98,54 @@ generate_plots(Simulation, EvalIds) ->
     InputFile = PlotDir ++ "transmission",
     OutputFile = output_file(PlotDir, "transmission"),
 
-    Header = "ABCXYZ,32_s,32_c,64_s,64_c,128_s,128_c,256_s,256_c,512_s,512_c\n",
-    L1 = io_lib:format("cs_s,~w,~w,~w,~w,~w,~w,~w,~w,~w,~w\n",
+    Header = "ABCXYZ,2_s,2_c,3_s,3_c,4_s,4_c,5_s,5_c\n",
+    L1 = io_lib:format("cs_s,~w,~w,~w,~w,~w,~w,~w,~w\n",
                        [
-                        element(1, orddict:fetch("32", orddict:fetch("client_server_state_based_with_aae", Map))),
-                        element(2, orddict:fetch("32", orddict:fetch("client_server_state_based_with_aae", Map))),
-                        element(1, orddict:fetch("64", orddict:fetch("client_server_state_based_with_aae", Map))),
-                        element(2, orddict:fetch("64", orddict:fetch("client_server_state_based_with_aae", Map))),
-                        element(1, orddict:fetch("128", orddict:fetch("client_server_state_based_with_aae", Map))),
-                        element(2, orddict:fetch("128", orddict:fetch("client_server_state_based_with_aae", Map))),
-                        0,
-                        0,
-                        0,
-                        0
+                        element(1, orddict:fetch("2", orddict:fetch("client_server_state_based_with_aae", Map))),
+                        element(2, orddict:fetch("2", orddict:fetch("client_server_state_based_with_aae", Map))),
+                        element(1, orddict:fetch("3", orddict:fetch("client_server_state_based_with_aae", Map))),
+                        element(2, orddict:fetch("3", orddict:fetch("client_server_state_based_with_aae", Map))),
+                        element(1, orddict:fetch("4", orddict:fetch("client_server_state_based_with_aae", Map))),
+                        element(2, orddict:fetch("4", orddict:fetch("client_server_state_based_with_aae", Map))),
+                        element(1, orddict:fetch("5", orddict:fetch("client_server_state_based_with_aae", Map))),
+                        element(2, orddict:fetch("5", orddict:fetch("client_server_state_based_with_aae", Map)))
                        ]),
-    L2 = io_lib:format("cs_d,~w,~w,~w,~w,~w,~w,~w,~w,~w,~w\n",
+    L2 = io_lib:format("cs_d,~w,~w,~w,~w,~w,~w,~w,~w\n",
                        [
-                        element(1, orddict:fetch("32", orddict:fetch("client_server_delta_based_with_aae", Map))),
-                        element(2, orddict:fetch("32", orddict:fetch("client_server_delta_based_with_aae", Map))),
-                        element(1, orddict:fetch("64", orddict:fetch("client_server_delta_based_with_aae", Map))),
-                        element(2, orddict:fetch("64", orddict:fetch("client_server_delta_based_with_aae", Map))),
-                        element(1, orddict:fetch("128", orddict:fetch("client_server_delta_based_with_aae", Map))),
-                        element(2, orddict:fetch("128", orddict:fetch("client_server_delta_based_with_aae", Map))),
-                        0,
-                        0,
-                        0,
-                        0
+                        element(1, orddict:fetch("2", orddict:fetch("client_server_delta_based_with_aae", Map))),
+                        element(2, orddict:fetch("2", orddict:fetch("client_server_delta_based_with_aae", Map))),
+                        element(1, orddict:fetch("3", orddict:fetch("client_server_delta_based_with_aae", Map))),
+                        element(2, orddict:fetch("3", orddict:fetch("client_server_delta_based_with_aae", Map))),
+                        element(1, orddict:fetch("4", orddict:fetch("client_server_delta_based_with_aae", Map))),
+                        element(2, orddict:fetch("4", orddict:fetch("client_server_delta_based_with_aae", Map))),
+                        element(1, orddict:fetch("5", orddict:fetch("client_server_delta_based_with_aae", Map))),
+                        element(2, orddict:fetch("5", orddict:fetch("client_server_delta_based_with_aae", Map)))
                        ]),
-    L3 = io_lib:format("p2p_s,~w,~w,~w,~w,~w,~w,~w,~w,~w,~w\n",
+    L3 = io_lib:format("p2p_s,~w,~w,~w,~w,~w,~w,~w,~w\n",
                        [
-                        element(1, orddict:fetch("32", orddict:fetch("peer_to_peer_state_based_with_aae", Map))),
-                        element(2, orddict:fetch("32", orddict:fetch("peer_to_peer_state_based_with_aae", Map))),
-                        element(1, orddict:fetch("64", orddict:fetch("peer_to_peer_state_based_with_aae", Map))),
-                        element(2, orddict:fetch("64", orddict:fetch("peer_to_peer_state_based_with_aae", Map))),
-                        element(1, orddict:fetch("128", orddict:fetch("peer_to_peer_state_based_with_aae", Map))),
-                        element(2, orddict:fetch("128", orddict:fetch("peer_to_peer_state_based_with_aae", Map))),
-                        element(1, orddict:fetch("256", orddict:fetch("peer_to_peer_state_based_with_aae", Map))),
-                        element(2, orddict:fetch("256", orddict:fetch("peer_to_peer_state_based_with_aae", Map))),
-                        element(1, orddict:fetch("512", orddict:fetch("peer_to_peer_state_based_with_aae", Map))),
-                        element(2, orddict:fetch("512", orddict:fetch("peer_to_peer_state_based_with_aae", Map)))
+                        element(1, orddict:fetch("2", orddict:fetch("peer_to_peer_state_based_with_aae", Map))),
+                        element(2, orddict:fetch("2", orddict:fetch("peer_to_peer_state_based_with_aae", Map))),
+                        element(1, orddict:fetch("3", orddict:fetch("peer_to_peer_state_based_with_aae", Map))),
+                        element(2, orddict:fetch("3", orddict:fetch("peer_to_peer_state_based_with_aae", Map))),
+                        element(1, orddict:fetch("4", orddict:fetch("peer_to_peer_state_based_with_aae", Map))),
+                        element(2, orddict:fetch("4", orddict:fetch("peer_to_peer_state_based_with_aae", Map))),
+                        element(1, orddict:fetch("5", orddict:fetch("peer_to_peer_state_based_with_aae", Map))),
+                        element(2, orddict:fetch("5", orddict:fetch("peer_to_peer_state_based_with_aae", Map)))
                        ]),
-    L4 = io_lib:format("p2p_d,~w,~w,~w,~w,~w,~w,~w,~w,~w,~w\n",
+
+    L4 = io_lib:format("p2p_d,~w,~w,~w,~w,~w,~w,~w,~w\n",
                        [
-                        element(1, orddict:fetch("32", orddict:fetch("peer_to_peer_state_based_with_aae", Map))),
-                        element(2, orddict:fetch("32", orddict:fetch("peer_to_peer_state_based_with_aae", Map))),
-                        element(1, orddict:fetch("64", orddict:fetch("peer_to_peer_state_based_with_aae", Map))),
-                        element(2, orddict:fetch("64", orddict:fetch("peer_to_peer_state_based_with_aae", Map))),
-                        element(1, orddict:fetch("128", orddict:fetch("peer_to_peer_state_based_with_aae", Map))),
-                        element(2, orddict:fetch("128", orddict:fetch("peer_to_peer_state_based_with_aae", Map))),
-                        element(1, orddict:fetch("256", orddict:fetch("peer_to_peer_state_based_with_aae", Map))),
-                        element(2, orddict:fetch("256", orddict:fetch("peer_to_peer_state_based_with_aae", Map))),
-                        element(1, orddict:fetch("512", orddict:fetch("peer_to_peer_state_based_with_aae", Map))),
-                        element(2, orddict:fetch("512", orddict:fetch("peer_to_peer_state_based_with_aae", Map)))
+                        element(1, orddict:fetch("2", orddict:fetch("peer_to_peer_delta_based_with_aae", Map))),
+                        element(2, orddict:fetch("2", orddict:fetch("peer_to_peer_delta_based_with_aae", Map))),
+                        element(1, orddict:fetch("3", orddict:fetch("peer_to_peer_delta_based_with_aae", Map))),
+                        element(2, orddict:fetch("3", orddict:fetch("peer_to_peer_delta_based_with_aae", Map))),
+                        element(1, orddict:fetch("4", orddict:fetch("peer_to_peer_delta_based_with_aae", Map))),
+                        element(2, orddict:fetch("4", orddict:fetch("peer_to_peer_delta_based_with_aae", Map))),
+                        element(1, orddict:fetch("5", orddict:fetch("peer_to_peer_delta_based_with_aae", Map))),
+                        element(2, orddict:fetch("5", orddict:fetch("peer_to_peer_delta_based_with_aae", Map)))
                        ]),
+    %% truncate file
+    write_to_file(InputFile, ""),
     append_to_file(InputFile, Header),
     append_to_file(InputFile, L1),
     append_to_file(InputFile, L2),
@@ -271,6 +266,10 @@ read_lines(FilePath, FileDescriptor) ->
         Line ->
             [Line | read_lines(FilePath, FileDescriptor)]
     end.
+
+%% @private
+write_to_file(InputFile, Line) ->
+    file:write_file(InputFile, Line, [write]).
 
 %% @private
 append_to_file(InputFile, Line) ->
