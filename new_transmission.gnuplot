@@ -30,6 +30,7 @@ set linetype 4 lc rgb "#F25900"
 set datafile separator ","
 set output outputname
 plot newhistogram "2", inputname using "2_s":xtic(1) t 'Server' lc 3, '' u "2_c" t 'Client' lc 4, \
-     newhistogram "3", '' u "3_s":xtic(1) t '' lc 3, '' u "3_c" t '' lc 4, \
      newhistogram "4", '' u "4_s":xtic(1) t '' lc 3, '' u "4_c" t '' lc 4, \
-     newhistogram "5", '' u "5_s":xtic(1) t '' lc 3, '' u "5_c" t '' lc 4
+     newhistogram "8", '' u "8_s":xtic(1) t '' lc 3, '' u "8_c" t '' lc 4, \
+     newhistogram "16", '' u "16_s":xtic(1) t '' lc 3, '' u "16_c" t '' lc 4, \
+     newhistogram "32", '' u "32_s":xtic(1) t '' lc 3, '' u "32_c" t '' lc 4
