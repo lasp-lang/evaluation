@@ -55,8 +55,11 @@ generate_plots(Simulation, EvalIds) ->
                             T = lists:foldl(
                                 fun(EvalTimestamp, ToAverage0) ->
                                     EvalDir = EvalIdDir ++ "/" ++ EvalTimestamp,
-                                    {ServerMB, ClientsMB} = get_server_and_clients_mb(EvalDir),
-
+                                    %% Before
+                                    %% {ServerMB, ClientsMB} = get_server_and_clients_mb(EvalDir),
+                                    %% Now
+                                    {ServerMB, ClientsMB} = get_state_and_protocol_mb(EvalDir),
+                                    
                                     orddict:store(
                                         EvalTimestamp,
                                         {ServerMB, ClientsMB},
@@ -98,45 +101,27 @@ generate_plots(Simulation, EvalIds) ->
     InputFile = PlotDir ++ "transmission",
     OutputFile = output_file(PlotDir, "transmission"),
 
-    Header = "ABCXYZ,2_s,2_c,4_s,4_c,8_s,8_c,16_s,16_c,32_s,32_c\n",
-    L1 = io_lib:format("cs_s,~w,~w,~w,~w,~w,~w,~w,~w,~w,~w\n",
+    Header = "ABCXYZ,32_s,32_c,64_s,64_c\n",
+    L1 = io_lib:format("sb,~w,~w,~w,~w\n",
                        [
-                        element(1, orddict:fetch("2", orddict:fetch("client_server_state_based_with_aae", Map))),
-                        element(2, orddict:fetch("2", orddict:fetch("client_server_state_based_with_aae", Map))),
-                        element(1, orddict:fetch("4", orddict:fetch("client_server_state_based_with_aae", Map))),
-                        element(2, orddict:fetch("4", orddict:fetch("client_server_state_based_with_aae", Map))),
-                        element(1, orddict:fetch("8", orddict:fetch("client_server_state_based_with_aae", Map))),
-                        element(2, orddict:fetch("8", orddict:fetch("client_server_state_based_with_aae", Map))),
-                        element(1, orddict:fetch("16", orddict:fetch("client_server_state_based_with_aae", Map))),
-                        element(2, orddict:fetch("16", orddict:fetch("client_server_state_based_with_aae", Map))),
-                        element(1, orddict:fetch("32", orddict:fetch("client_server_state_based_with_aae", Map))),
-                        element(2, orddict:fetch("32", orddict:fetch("client_server_state_based_with_aae", Map)))
+                        element(1, orddict:fetch("32", orddict:fetch("peer_to_peer_state_based_with_aae_test", Map))),
+                        element(2, orddict:fetch("32", orddict:fetch("peer_to_peer_state_based_with_aae_test", Map))),
+                        element(1, orddict:fetch("64", orddict:fetch("peer_to_peer_state_based_with_aae_test", Map))),
+                        element(2, orddict:fetch("64", orddict:fetch("peer_to_peer_state_based_with_aae_test", Map)))
                        ]),
-    L2 = io_lib:format("r_cs_s,~w,~w,~w,~w,~w,~w,~w,~w,~w,~w\n",
+    L2 = io_lib:format("db,~w,~w,~w,~w\n",
                        [
-                        element(1, orddict:fetch("2", orddict:fetch("reactive_client_server_state_based_with_aae", Map))),
-                        element(2, orddict:fetch("2", orddict:fetch("reactive_client_server_state_based_with_aae", Map))),
-                        element(1, orddict:fetch("4", orddict:fetch("reactive_client_server_state_based_with_aae", Map))),
-                        element(2, orddict:fetch("4", orddict:fetch("reactive_client_server_state_based_with_aae", Map))),
-                        element(1, orddict:fetch("8", orddict:fetch("reactive_client_server_state_based_with_aae", Map))),
-                        element(2, orddict:fetch("8", orddict:fetch("reactive_client_server_state_based_with_aae", Map))),
-                        element(1, orddict:fetch("16", orddict:fetch("reactive_client_server_state_based_with_aae", Map))),
-                        element(2, orddict:fetch("16", orddict:fetch("reactive_client_server_state_based_with_aae", Map))),
-                        element(1, orddict:fetch("32", orddict:fetch("reactive_client_server_state_based_with_aae", Map))),
-                        element(2, orddict:fetch("32", orddict:fetch("reactive_client_server_state_based_with_aae", Map)))
+                        element(1, orddict:fetch("32", orddict:fetch("peer_to_peer_delta_based_with_aae_test", Map))),
+                        element(2, orddict:fetch("32", orddict:fetch("peer_to_peer_delta_based_with_aae_test", Map))),
+                        element(1, orddict:fetch("64", orddict:fetch("peer_to_peer_delta_based_with_aae_test", Map))),
+                        element(2, orddict:fetch("64", orddict:fetch("peer_to_peer_delta_based_with_aae_test", Map)))
                        ]),
-    L3 = io_lib:format("p2p_s,~w,~w,~w,~w,~w,~w,~w,~w,~w,~w\n",
+    L3 = io_lib:format("bb,~w,~w,~w,~w\n",
                        [
-                        element(1, orddict:fetch("2", orddict:fetch("peer_to_peer_state_based_with_aae", Map))),
-                        element(2, orddict:fetch("2", orddict:fetch("peer_to_peer_state_based_with_aae", Map))),
-                        element(1, orddict:fetch("4", orddict:fetch("peer_to_peer_state_based_with_aae", Map))),
-                        element(2, orddict:fetch("4", orddict:fetch("peer_to_peer_state_based_with_aae", Map))),
-                        element(1, orddict:fetch("8", orddict:fetch("peer_to_peer_state_based_with_aae", Map))),
-                        element(2, orddict:fetch("8", orddict:fetch("peer_to_peer_state_based_with_aae", Map))),
-                        element(1, orddict:fetch("16", orddict:fetch("peer_to_peer_state_based_with_aae", Map))),
-                        element(2, orddict:fetch("16", orddict:fetch("peer_to_peer_state_based_with_aae", Map))),
-                        element(1, orddict:fetch("32", orddict:fetch("peer_to_peer_state_based_with_aae", Map))),
-                        element(2, orddict:fetch("32", orddict:fetch("peer_to_peer_state_based_with_aae", Map)))
+                        element(1, orddict:fetch("32", orddict:fetch("peer_to_peer_state_based_with_aae_and_tree_test", Map))),
+                        element(2, orddict:fetch("32", orddict:fetch("peer_to_peer_state_based_with_aae_and_tree_test", Map))),
+                        element(1, orddict:fetch("64", orddict:fetch("peer_to_peer_state_based_with_aae_and_tree_test", Map))),
+                        element(2, orddict:fetch("64", orddict:fetch("peer_to_peer_state_based_with_aae_and_tree_test", Map)))
                        ]),
     %% truncate file
     write_to_file(InputFile, ""),
@@ -216,6 +201,22 @@ get_server_and_clients_mb(EvalDir) ->
     {ServerMB, ClientsMB}.
 
 %% @private
+get_state_and_protocol_mb(EvalDir) ->
+    LogFiles = only_csv_files(EvalDir),
+    {StateMB, ProtocolMB} = lists:foldl(
+        fun(File, {StateAcc, ProtocolAcc}) ->
+            FilePath = EvalDir ++ "/" ++ File,
+            {State, Protocol} = get_state_and_protocol_transmission(FilePath),
+
+            {StateAcc + State, ProtocolAcc + Protocol}
+        end,
+        {0, 0},
+        LogFiles
+    ),
+
+    {StateMB, ProtocolMB}.
+
+%% @private
 get_node_type_and_last_value(FilePath) ->
     %% Open log file
     {ok, FileDescriptor} = file:open(FilePath, [read]),
@@ -248,6 +249,43 @@ get_node_type_and_last_value(FilePath) ->
         Lines
     ).
 
+%% @private
+get_state_and_protocol_transmission(FilePath) ->
+    %% Open log file
+    {ok, FileDescriptor} = file:open(FilePath, [read]),
+
+    %% Ignore the first line
+    [_ | Lines] = read_lines(FilePath, FileDescriptor),
+
+    lists:foldl(
+        fun(Line, {StateAcc, ProtocolAcc}) ->
+            %% Parse log line
+            [Type0, _Time0, Bytes0] = string:tokens(Line, ",\n"),
+            TypeA = list_to_atom(Type0),
+            {BytesF, _} = string:to_float(Bytes0),
+
+            case log_type(TypeA) of
+                state ->
+                    {StateAcc + BytesF, ProtocolAcc};
+                protocol ->
+                    {StateAcc, ProtocolAcc + BytesF};
+                ignore ->
+                    {StateAcc, ProtocolAcc}
+            end
+        end,
+        {0, 0},
+        Lines
+    ).
+
+log_type(memory) -> ignore;
+log_type(convergence) -> ignore;
+log_type(experiment_started) -> ignore;
+log_type(aae_send) -> state;
+log_type(aae_send_protocol) -> protocol;
+log_type(delta_send) -> state;
+log_type(delta_send_protocol) -> protocol;
+log_type(broadcast) -> state;
+log_type(broadcast_protocol) -> protocol.
 %% @private
 read_lines(FilePath, FileDescriptor) ->
     case io:get_line(FileDescriptor, '') of
