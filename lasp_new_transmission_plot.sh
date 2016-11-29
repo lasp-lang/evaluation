@@ -101,27 +101,39 @@ generate_plots(Simulation, EvalIds) ->
     InputFile = PlotDir ++ "transmission",
     OutputFile = output_file(PlotDir, "transmission"),
 
-    Header = "ABCXYZ,32_s,32_c,64_s,64_c\n",
-    L1 = io_lib:format("sb,~w,~w,~w,~w\n",
+    Header = "ABCXYZ,32_s,32_c,64_s,64_c,128_s,128_c,256_s,256_c\n",
+    L1 = io_lib:format("state-based,~w,~w,~w,~w,~w,~w,~w,~w\n",
                        [
                         element(1, orddict:fetch("32", orddict:fetch("peer_to_peer_state_based_with_aae_test", Map))),
                         element(2, orddict:fetch("32", orddict:fetch("peer_to_peer_state_based_with_aae_test", Map))),
                         element(1, orddict:fetch("64", orddict:fetch("peer_to_peer_state_based_with_aae_test", Map))),
-                        element(2, orddict:fetch("64", orddict:fetch("peer_to_peer_state_based_with_aae_test", Map)))
+                        element(2, orddict:fetch("64", orddict:fetch("peer_to_peer_state_based_with_aae_test", Map))),
+                        element(1, orddict:fetch("128", orddict:fetch("peer_to_peer_state_based_with_aae_test", Map))),
+                        element(2, orddict:fetch("128", orddict:fetch("peer_to_peer_state_based_with_aae_test", Map))),
+                        element(1, orddict:fetch("256", orddict:fetch("peer_to_peer_state_based_with_aae_test", Map))),
+                        element(2, orddict:fetch("256", orddict:fetch("peer_to_peer_state_based_with_aae_test", Map)))
                        ]),
-    L2 = io_lib:format("db,~w,~w,~w,~w\n",
+    L2 = io_lib:format("delta-based,~w,~w,~w,~w,~w,~w,~w,~w\n",
                        [
                         element(1, orddict:fetch("32", orddict:fetch("peer_to_peer_delta_based_with_aae_test", Map))),
                         element(2, orddict:fetch("32", orddict:fetch("peer_to_peer_delta_based_with_aae_test", Map))),
                         element(1, orddict:fetch("64", orddict:fetch("peer_to_peer_delta_based_with_aae_test", Map))),
-                        element(2, orddict:fetch("64", orddict:fetch("peer_to_peer_delta_based_with_aae_test", Map)))
+                        element(2, orddict:fetch("64", orddict:fetch("peer_to_peer_delta_based_with_aae_test", Map))),
+                        0,
+                        0,
+                        0,
+                        0
                        ]),
-    L3 = io_lib:format("bb,~w,~w,~w,~w\n",
+    L3 = io_lib:format("broadcast,~w,~w,~w,~w,~w,~w,~w,~w\n",
                        [
                         element(1, orddict:fetch("32", orddict:fetch("peer_to_peer_state_based_with_aae_and_tree_test", Map))),
                         element(2, orddict:fetch("32", orddict:fetch("peer_to_peer_state_based_with_aae_and_tree_test", Map))),
                         element(1, orddict:fetch("64", orddict:fetch("peer_to_peer_state_based_with_aae_and_tree_test", Map))),
-                        element(2, orddict:fetch("64", orddict:fetch("peer_to_peer_state_based_with_aae_and_tree_test", Map)))
+                        element(2, orddict:fetch("64", orddict:fetch("peer_to_peer_state_based_with_aae_and_tree_test", Map))),
+                        element(1, orddict:fetch("128", orddict:fetch("peer_to_peer_state_based_with_aae_and_tree_test", Map))),
+                        element(2, orddict:fetch("128", orddict:fetch("peer_to_peer_state_based_with_aae_and_tree_test", Map))),
+                        element(1, orddict:fetch("256", orddict:fetch("peer_to_peer_state_based_with_aae_and_tree_test", Map))),
+                        element(2, orddict:fetch("256", orddict:fetch("peer_to_peer_state_based_with_aae_and_tree_test", Map)))
                        ]),
     %% truncate file
     write_to_file(InputFile, ""),
