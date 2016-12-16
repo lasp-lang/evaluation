@@ -19,7 +19,7 @@ set rtics axis in scale 0,0 nomirror norotate  autojustify
 set title "Advertisement Impression Counter" 
 set xlabel "(Client Number)" 
 set xlabel  offset character 0, -1, 0 font "" textcolor lt -1 norotate
-set ylabel "MB Transmitted" 
+set ylabel "GB Transmitted" 
 set yrange [0:*]
 ##set yrange [ 0.00000 : 900000. ] noreverse nowriteback
 
