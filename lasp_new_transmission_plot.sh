@@ -102,7 +102,7 @@ generate_plots(Simulation, EvalIds) ->
     OutputFile = output_file(PlotDir, "transmission"),
 
     Header = "ABCXYZ,8_s,8_c,16_s,16_c,32_s,32_c\n",
-    L1 = io_lib:format("hg-lasp,~w,~w,~w,~w\n",
+    L1 = io_lib:format("hg-lasp,~w,~w,~w,~w,~w,~w\n",
                        [
                         gb(element(1, orddict:fetch("8", orddict:fetch("peer_to_peer_state_based_with_aae_test", Map)))),
                         gb(element(2, orddict:fetch("8", orddict:fetch("peer_to_peer_state_based_with_aae_test", Map)))),
@@ -111,7 +111,7 @@ generate_plots(Simulation, EvalIds) ->
                         gb(element(1, orddict:fetch("32", orddict:fetch("peer_to_peer_state_based_with_aae_test", Map)))),
                         gb(element(2, orddict:fetch("32", orddict:fetch("peer_to_peer_state_based_with_aae_test", Map))))
                        ]),
-    L2 = io_lib:format("hg-lasp-tree,~w,~w,~w,~w\n",
+    L2 = io_lib:format("hg-lasp-tree,~w,~w,~w,~w,~w,~w\n",
                        [
                         gb(element(1, orddict:fetch("8", orddict:fetch("peer_to_peer_state_based_with_aae_and_tree_test", Map)))),
                         gb(element(2, orddict:fetch("8", orddict:fetch("peer_to_peer_state_based_with_aae_and_tree_test", Map)))),
