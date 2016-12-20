@@ -101,46 +101,26 @@ generate_plots(Simulation, EvalIds) ->
     InputFile = PlotDir ++ "transmission",
     OutputFile = output_file(PlotDir, "transmission"),
 
-    Header = "ABCXYZ,32_s,32_c,64_s,64_c,128_s,128_c,256_s,256_c\n",
-    L1 = io_lib:format("dc-state,~w,~w,~w,~w,~w,~w,~w,~w\n",
+    Header = "ABCXYZ,512_s,512_c,1024_s,1024_c\n",
+    L1 = io_lib:format("hg-state,~w,~w,~w,~w\n",
                        [
-                        gb(element(1, orddict:fetch("32", orddict:fetch("client_server_state_based_with_aae_test", Map)))),
-                        gb(element(2, orddict:fetch("32", orddict:fetch("client_server_state_based_with_aae_test", Map)))),
-                        gb(element(1, orddict:fetch("64", orddict:fetch("client_server_state_based_with_aae_test", Map)))),
-                        gb(element(2, orddict:fetch("64", orddict:fetch("client_server_state_based_with_aae_test", Map)))),
-                        gb(element(1, orddict:fetch("128", orddict:fetch("client_server_state_based_with_aae_test", Map)))),
-                        gb(element(2, orddict:fetch("128", orddict:fetch("client_server_state_based_with_aae_test", Map)))),
-                        gb(element(1, orddict:fetch("256", orddict:fetch("client_server_state_based_with_aae_test", Map)))),
-                        gb(element(2, orddict:fetch("256", orddict:fetch("client_server_state_based_with_aae_test", Map))))
+                        gb(element(1, orddict:fetch("512", orddict:fetch("peer_to_peer_state_based_with_aae_test", Map)))),
+                        gb(element(2, orddict:fetch("512", orddict:fetch("peer_to_peer_state_based_with_aae_test", Map)))),
+                        gb(element(1, orddict:fetch("1024", orddict:fetch("peer_to_peer_state_based_with_aae_test", Map)))),
+                        gb(element(2, orddict:fetch("1024", orddict:fetch("peer_to_peer_state_based_with_aae_test", Map))))
                        ]),
-    L2 = io_lib:format("hg-state,~w,~w,~w,~w,~w,~w,~w,~w\n",
+    L2 = io_lib:format("hg-delta,~w,~w,~w,~w\n",
                        [
-                        gb(element(1, orddict:fetch("32", orddict:fetch("peer_to_peer_state_based_with_aae_test", Map)))),
-                        gb(element(2, orddict:fetch("32", orddict:fetch("peer_to_peer_state_based_with_aae_test", Map)))),
-                        gb(element(1, orddict:fetch("64", orddict:fetch("peer_to_peer_state_based_with_aae_test", Map)))),
-                        gb(element(2, orddict:fetch("64", orddict:fetch("peer_to_peer_state_based_with_aae_test", Map)))),
-                        gb(element(1, orddict:fetch("128", orddict:fetch("peer_to_peer_state_based_with_aae_test", Map)))),
-                        gb(element(2, orddict:fetch("128", orddict:fetch("peer_to_peer_state_based_with_aae_test", Map)))),
-                        gb(element(1, orddict:fetch("256", orddict:fetch("peer_to_peer_state_based_with_aae_test", Map)))),
-                        gb(element(2, orddict:fetch("256", orddict:fetch("peer_to_peer_state_based_with_aae_test", Map))))
-                       ]),
-    L3 = io_lib:format("hg-delta,~w,~w,~w,~w,~w,~w,~w,~w\n",
-                       [
-                        gb(element(1, orddict:fetch("32", orddict:fetch("peer_to_peer_delta_based_with_aae_test", Map)))),
-                        gb(element(2, orddict:fetch("32", orddict:fetch("peer_to_peer_delta_based_with_aae_test", Map)))),
-                        gb(element(1, orddict:fetch("64", orddict:fetch("peer_to_peer_delta_based_with_aae_test", Map)))),
-                        gb(element(2, orddict:fetch("64", orddict:fetch("peer_to_peer_delta_based_with_aae_test", Map)))),
-                        gb(element(1, orddict:fetch("128", orddict:fetch("peer_to_peer_delta_based_with_aae_test", Map)))),
-                        gb(element(2, orddict:fetch("128", orddict:fetch("peer_to_peer_delta_based_with_aae_test", Map)))),
-                        gb(element(1, orddict:fetch("256", orddict:fetch("peer_to_peer_delta_based_with_aae_test", Map)))),
-                        gb(element(2, orddict:fetch("256", orddict:fetch("peer_to_peer_delta_based_with_aae_test", Map))))
+                        gb(element(1, orddict:fetch("512", orddict:fetch("peer_to_peer_delta_based_with_aae_test", Map)))),
+                        gb(element(2, orddict:fetch("512", orddict:fetch("peer_to_peer_delta_based_with_aae_test", Map)))),
+                        gb(element(1, orddict:fetch("1024", orddict:fetch("peer_to_peer_delta_based_with_aae_test", Map)))),
+                        gb(element(2, orddict:fetch("1024", orddict:fetch("peer_to_peer_delta_based_with_aae_test", Map))))
                        ]),
     %% truncate file
     write_to_file(InputFile, ""),
     append_to_file(InputFile, Header),
     append_to_file(InputFile, L1),
     append_to_file(InputFile, L2),
-    append_to_file(InputFile, L3),
 
     Result = run_gnuplot(InputFile, OutputFile),
     io:format("Generating transmission plot ~p. Output: ~p~n~n", [OutputFile, Result]).
