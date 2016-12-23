@@ -58,11 +58,11 @@ generate_plots(Simulation, EvalIds) ->
                                     %% Before
                                     %% {ServerMB, ClientsMB} = get_server_and_clients_mb(EvalDir),
                                     %% Now
-                                    {ServerMB, ClientsMB} = get_state_and_protocol_mb(EvalDir),
+                                    Tuple = get_state_and_protocol_mb(EvalDir),
                                     
                                     orddict:store(
                                         EvalTimestamp,
-                                        {ServerMB, ClientsMB},
+                                        Tuple,
                                         ToAverage0
                                     )
                                 end,
@@ -70,7 +70,7 @@ generate_plots(Simulation, EvalIds) ->
                                 EvalTimestamps
                             ),
 
-                            {ServerMBAvg, ClientsMBAvg} = average_server_and_clients_mb(T),
+                            Tuple = average_state_and_protocol_mb(T),
 
                             PerClients0 = case orddict:find(Id, Acc) of
                                 {ok, CPC} ->
@@ -79,7 +79,7 @@ generate_plots(Simulation, EvalIds) ->
                                     orddict:new()
                             end,
 
-                            PerClients1 = orddict:store(ClientNumber, {ServerMBAvg, ClientsMBAvg}, PerClients0),
+                            PerClients1 = orddict:store(ClientNumber, Tuple, PerClients0),
                             orddict:store(Id, PerClients1, Acc);
                         true ->
                             io:format("Ignoring ~p~n", [EvalId]),
@@ -101,24 +101,30 @@ generate_plots(Simulation, EvalIds) ->
     InputFile = PlotDir ++ "transmission",
     OutputFile = output_file(PlotDir, "transmission"),
 
-    Header = "ABCXYZ,8_s,8_c,16_s,16_c,32_s,32_c\n",
-    L1 = io_lib:format("hg-lasp,~w,~w,~w,~w,~w,~w\n",
+    Header = "ABCXYZ,8_s,8_d,8_o,16_s,16_d,16_o,32_s,32_d,32_o\n",
+    L1 = io_lib:format("hg-lasp,~w,~w,~w,~w,~w,~w,~w,~w,~w\n",
                        [
                         gb(element(1, orddict:fetch("8", orddict:fetch("peer_to_peer_state_based_with_aae_test", Map)))),
                         gb(element(2, orddict:fetch("8", orddict:fetch("peer_to_peer_state_based_with_aae_test", Map)))),
+                        gb(element(3, orddict:fetch("8", orddict:fetch("peer_to_peer_state_based_with_aae_test", Map)))),
                         gb(element(1, orddict:fetch("16", orddict:fetch("peer_to_peer_state_based_with_aae_test", Map)))),
                         gb(element(2, orddict:fetch("16", orddict:fetch("peer_to_peer_state_based_with_aae_test", Map)))),
+                        gb(element(3, orddict:fetch("16", orddict:fetch("peer_to_peer_state_based_with_aae_test", Map)))),
                         gb(element(1, orddict:fetch("32", orddict:fetch("peer_to_peer_state_based_with_aae_test", Map)))),
-                        gb(element(2, orddict:fetch("32", orddict:fetch("peer_to_peer_state_based_with_aae_test", Map))))
+                        gb(element(2, orddict:fetch("32", orddict:fetch("peer_to_peer_state_based_with_aae_test", Map)))),
+                        gb(element(3, orddict:fetch("32", orddict:fetch("peer_to_peer_state_based_with_aae_test", Map))))
                        ]),
-    L2 = io_lib:format("hg-lasp-tree,~w,~w,~w,~w,~w,~w\n",
+    L2 = io_lib:format("hg-lasp-tree,~w,~w,~w,~w,~w,~w,~w,~w,~w\n",
                        [
                         gb(element(1, orddict:fetch("8", orddict:fetch("peer_to_peer_state_based_with_aae_and_tree_test", Map)))),
                         gb(element(2, orddict:fetch("8", orddict:fetch("peer_to_peer_state_based_with_aae_and_tree_test", Map)))),
+                        gb(element(3, orddict:fetch("8", orddict:fetch("peer_to_peer_state_based_with_aae_and_tree_test", Map)))),
                         gb(element(1, orddict:fetch("16", orddict:fetch("peer_to_peer_state_based_with_aae_and_tree_test", Map)))),
                         gb(element(2, orddict:fetch("16", orddict:fetch("peer_to_peer_state_based_with_aae_and_tree_test", Map)))),
+                        gb(element(3, orddict:fetch("16", orddict:fetch("peer_to_peer_state_based_with_aae_and_tree_test", Map)))),
                         gb(element(1, orddict:fetch("32", orddict:fetch("peer_to_peer_state_based_with_aae_and_tree_test", Map)))),
-                        gb(element(2, orddict:fetch("32", orddict:fetch("peer_to_peer_state_based_with_aae_and_tree_test", Map))))
+                        gb(element(2, orddict:fetch("32", orddict:fetch("peer_to_peer_state_based_with_aae_and_tree_test", Map)))),
+                        gb(element(3, orddict:fetch("32", orddict:fetch("peer_to_peer_state_based_with_aae_and_tree_test", Map))))
                        ]),
     %% truncate file
     write_to_file(InputFile, ""),
@@ -179,74 +185,17 @@ only_csv_files(LogDir) ->
     ).
 
 %% @private
-get_server_and_clients_mb(EvalDir) ->
-    LogFiles = only_csv_files(EvalDir),
-    {ServerMB, ClientsMB} = lists:foldl(
-        fun(File, {ServerAcc, ClientsAcc}) ->
-            FilePath = EvalDir ++ "/" ++ File,
-
-            {ServerOrClient, LastValue} = get_node_type_and_last_value(FilePath),
-
-            case ServerOrClient of
-                server ->
-                    {ServerAcc + LastValue, ClientsAcc};
-                client ->
-                    {ServerAcc, ClientsAcc + LastValue}
-            end
-        end,
-        {0, 0},
-        LogFiles
-    ),
-
-    {ServerMB, ClientsMB}.
-
-%% @private
 get_state_and_protocol_mb(EvalDir) ->
     LogFiles = only_csv_files(EvalDir),
-    {StateMB, ProtocolMB} = lists:foldl(
-        fun(File, {StateAcc, ProtocolAcc}) ->
-            FilePath = EvalDir ++ "/" ++ File,
-            {State, Protocol} = get_state_and_protocol_transmission(FilePath),
-
-            {StateAcc + State, ProtocolAcc + Protocol}
-        end,
-        {0, 0},
-        LogFiles
-    ),
-
-    {StateMB, ProtocolMB}.
-
-%% @private
-get_node_type_and_last_value(FilePath) ->
-    %% Open log file
-    {ok, FileDescriptor} = file:open(FilePath, [read]),
-
-    %% Ignore the first line
-    [_ | Lines] = read_lines(FilePath, FileDescriptor),
-
     lists:foldl(
-        fun(Line, {ServerOrClient0, LastValue0}) ->
-            %% Parse log line
-            [Type0, _Time0, Bytes0] = string:tokens(Line, ",\n"),
-            TypeA = list_to_atom(Type0),
-            {BytesF, _} = string:to_float(Bytes0),
+        fun(File, {StateAcc, DisseminationAcc, OverlayAcc}) ->
+            FilePath = EvalDir ++ "/" ++ File,
+            {State, Dissemination, Overlay} = get_state_and_protocol_transmission(FilePath),
 
-            case TypeA of
-                memory ->
-                    %% Ignore memory logs
-                    {ServerOrClient0, LastValue0};
-                experiment_started ->
-                    {server, LastValue0};
-                convergence ->
-                    %% Ignore convergence logs
-                    {ServerOrClient0, LastValue0};
-                _ ->
-                    %% TODO this assumes there's only one other type of logs
-                    {ServerOrClient0, BytesF}
-            end
+            {StateAcc + State, DisseminationAcc + Dissemination,  OverlayAcc + Overlay}
         end,
-        {client, 0},
-        Lines
+        {0, 0, 0},
+        LogFiles
     ).
 
 %% @private
@@ -270,33 +219,33 @@ get_state_and_protocol_transmission(FilePath) ->
         Lines
     ),
 
-    {State, Protocol} = lists:foldl(
-        fun({LogType, Bytes}, {StateAcc, ProtocolAcc}) ->
+    lists:foldl(
+        fun({LogType, Bytes}, {StateAcc, DisseminationAcc, OverlayAcc}) ->
             case log_type(LogType) of
                 state ->
-                    {StateAcc + Bytes, ProtocolAcc};
-                protocol ->
-                    {StateAcc, ProtocolAcc + Bytes};
+                    {StateAcc + Bytes, DisseminationAcc, OverlayAcc};
+                dissemination_protocol ->
+                    {StateAcc, DisseminationAcc + Bytes, OverlayAcc};
+                overlay_protocol ->
+                    {StateAcc, DisseminationAcc, OverlayAcc + Bytes};
                 ignore ->
-                    {StateAcc, ProtocolAcc}
+                    {StateAcc, DisseminationAcc, OverlayAcc}
             end
         end,
-        {0, 0},
+        {0, 0, 0},
         LogTypeToLastBytes
-    ),
-
-    {State, Protocol}.
+    ).
 
 %% @private
 log_type(memory) -> ignore;
 log_type(convergence) -> ignore;
 log_type(experiment_started) -> ignore;
 log_type(aae_send) -> state;
-log_type(aae_send_protocol) -> protocol;
+log_type(aae_send_protocol) -> dissemination_protocol;
 log_type(delta_send) -> state;
-log_type(delta_send_protocol) -> protocol;
+log_type(delta_send_protocol) -> dissemination_protocol;
 log_type(broadcast) -> state;
-log_type(broadcast_protocol) -> protocol.
+log_type(broadcast_protocol) -> overlay_protocol.
 %% @private
 read_lines(FilePath, FileDescriptor) ->
     case io:get_line(FileDescriptor, '') of
@@ -318,16 +267,16 @@ append_to_file(InputFile, Line) ->
     file:write_file(InputFile, Line, [append]).
 
 %% @doc Average all executions
-average_server_and_clients_mb(ToAverage) ->
-    {NumberOfExecutions, ServerMBSum, ClientsMBSum} = orddict:fold(
-        fun(_Timestamp, {ServerMB, ClientsMB}, {CountAcc, ServerAcc, ClientsAcc}) ->
-            {CountAcc + 1, ServerAcc + ServerMB, ClientsAcc + ClientsMB}
+average_state_and_protocol_mb(ToAverage) ->
+    {NumberOfExecutions, StateSum, DisseminationSum, OverlaySum} = orddict:fold(
+        fun(_Timestamp, {StateMB, DisseminationMB, OverlayMB}, {CountAcc, StateAcc, DisseminationAcc, OverlayAcc}) ->
+            {CountAcc + 1, StateAcc + StateMB, DisseminationAcc + DisseminationMB, OverlayAcc + OverlayMB}
         end,
-        {0, 0, 0},
+        {0, 0, 0, 0},
         ToAverage
     ),
 
-    {ServerMBSum / NumberOfExecutions, ClientsMBSum / NumberOfExecutions}.
+    {StateSum / NumberOfExecutions, DisseminationSum / NumberOfExecutions, OverlaySum / NumberOfExecutions}.
 
 %% @private
 run_gnuplot(InputFile, OutputFile) ->

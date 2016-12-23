@@ -24,11 +24,11 @@ set yrange [0:*]
 ##set yrange [ 0.00000 : 900000. ] noreverse nowriteback
 
 set linetype 1 lc rgb "#A00000"
-set linetype 2 lc rgb "#00A000"
+set linetype 2 lc rgb "#2c3e50"
 set linetype 3 lc rgb "#5060D0"
 set linetype 4 lc rgb "#F25900"
 set datafile separator ","
 set output outputname
-plot newhistogram "8", inputname using "8_s":xtic(1) t 'State' lc 3, '' u "8_c" t 'Protocol' lc 4, \
-     newhistogram "16", '' u "16_s":xtic(1) t '' lc 3, '' u "16_c" t '' lc 4, \
-     newhistogram "32", '' u "32_s":xtic(1) t '' lc 3, '' u "32_c" t '' lc 4
+plot newhistogram "8", inputname using "8_s":xtic(1) t 'State' lc 3, '' u "8_d" t 'Dissemination Protocol' lc 4,  '' u "8_o" t 'Overlay Protocol' lc 2, \
+     newhistogram "16", '' u "16_s":xtic(1) t '' lc 3, '' u "16_d" t '' lc 4, '' u "16_o" t '' lc 2, \
+     newhistogram "32", '' u "32_s":xtic(1) t '' lc 3, '' u "32_d" t '' lc 4, '' u "32_o" t '' lc 2
