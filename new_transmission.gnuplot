@@ -29,6 +29,7 @@ set linetype 3 lc rgb "#5060D0"
 set linetype 4 lc rgb "#F25900"
 set datafile separator ","
 set output outputname
-plot newhistogram "8", inputname using "8_s":xtic(1) t 'State' lc 3, '' u "8_d" t 'Dissemination Protocol' lc 4,  '' u "8_o" t 'Overlay Protocol' lc 2, \
-     newhistogram "16", '' u "16_s":xtic(1) t '' lc 3, '' u "16_d" t '' lc 4, '' u "16_o" t '' lc 2, \
-     newhistogram "32", '' u "32_s":xtic(1) t '' lc 3, '' u "32_d" t '' lc 4, '' u "32_o" t '' lc 2
+plot newhistogram "128", inputname using "128_s":xtic(1) t 'State' lc 3, \
+     newhistogram "256", '' u "256_s":xtic(1) t '' lc 3, \
+     newhistogram "512", '' u "512_s":xtic(1) t '' lc 3, \
+     newhistogram "1024", '' u "1024_s":xtic(1) t '' lc 3

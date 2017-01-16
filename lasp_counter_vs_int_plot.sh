@@ -98,16 +98,20 @@ generate_plots(Simulation, EvalIds) ->
     InputFile = PlotDir ++ "transmission",
     OutputFile = output_file(PlotDir, "transmission"),
 
-    Header = "ABCXYZ,32_s,64_s\n",
-    L1 = io_lib:format("gcounter,~w,~w",
+    Header = "ABCXYZ,32_s,64_s,128_s,256_s\n",
+    L1 = io_lib:format("gcounter,~w,~w,~w,~w\n",
                        [
                         gb(element(1, orddict:fetch("32", orddict:fetch("peer_to_peer_state_based_with_aae_test", Map)))),
-                        gb(element(1, orddict:fetch("64", orddict:fetch("peer_to_peer_state_based_with_aae_test", Map))))
+                        gb(element(1, orddict:fetch("64", orddict:fetch("peer_to_peer_state_based_with_aae_test", Map)))),
+                        gb(element(1, orddict:fetch("128", orddict:fetch("peer_to_peer_state_based_with_aae_test", Map)))),
+                        gb(element(1, orddict:fetch("256", orddict:fetch("peer_to_peer_state_based_with_aae_test", Map))))
                        ]),
-    L2 = io_lib:format("max_int,~w,~w\n",
+    L2 = io_lib:format("max_int,~w,~w,~w,~w\n",
                        [
                         gb(element(2, orddict:fetch("32", orddict:fetch("peer_to_peer_state_based_with_aae_test", Map)))),
-                        gb(element(2, orddict:fetch("64", orddict:fetch("peer_to_peer_state_based_with_aae_test", Map))))
+                        gb(element(2, orddict:fetch("64", orddict:fetch("peer_to_peer_state_based_with_aae_test", Map)))),
+                        gb(element(2, orddict:fetch("128", orddict:fetch("peer_to_peer_state_based_with_aae_test", Map)))),
+                        gb(element(2, orddict:fetch("256", orddict:fetch("peer_to_peer_state_based_with_aae_test", Map))))
                        ]),
     %% truncate file
     write_to_file(InputFile, ""),

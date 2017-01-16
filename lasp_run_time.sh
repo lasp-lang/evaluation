@@ -191,16 +191,23 @@ get_node_run_time(FilePath) ->
     {StartTime, EndTime} = lists:foldl(
         fun(Line, {Start0, End0}) ->
             %% Parse log line
-            [Type0, Time0, _Bytes0] = string:tokens(Line, ",\n"),
-            TypeA = list_to_atom(Type0),
-            TimeI = list_to_integer(Time0),
+            case length(string:tokens(Line, ",\n")) == 3 of
+                true ->
+                    [Type0, Time0, _Bytes0] = string:tokens(Line, ",\n"),
+                    TypeA = list_to_atom(Type0),
+                    TimeI = list_to_integer(Time0),
 
-            case TypeA of
-                experiment_started ->
-                    {TimeI, End0};
-                convergence ->
-                    {Start0, TimeI};
-                _ ->
+                    case TypeA of
+                        experiment_started ->
+                            {TimeI, End0};
+                        convergence ->
+                            {Start0, TimeI};
+                        _ ->
+                            {Start0, End0}
+                    end;
+                false ->
+                    %% IGNORE lines that start with
+                    %% {gmap,[{pair,[boolean,boolean]}]}
                     {Start0, End0}
             end
         end,
