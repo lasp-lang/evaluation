@@ -83,23 +83,39 @@ generate_plots(Simulation, EvalIds) ->
 
     PlotDir = root_plot_dir() ++ "/" ++ Simulation ++ "/",
     filelib:ensure_dir(PlotDir),
-    InputFile = PlotDir ++ "throughput",
     OutputFile = output_file(PlotDir, "throughput"),
 
-		%% truncate file
-    write_to_file(InputFile, ""),
-    lists:foreach(
-        fun({ClientNumber, {T, L}}) ->
-            Line = float_to_list(T) ++ ","
-                ++ float_to_list(L) ++ ","
-                ++ ClientNumber ++ "\n",
-            append_to_file(InputFile, Line)
+    {InputFiles, Titles} = lists:foldl(
+        fun({Id, V}, {InputFiles0, Titles0}) ->
+            InputFile = PlotDir ++ Id,
+            Title = get_title(Id),
+            
+		        %% truncate file
+            write_to_file(InputFile, ""),
+
+            lists:foreach(
+                fun({ClientNumber, {T, L}}) ->
+                    Line = float_to_list(T) ++ ","
+                        ++ float_to_list(L) ++ ","
+                        ++ ClientNumber ++ "\n",
+                    append_to_file(InputFile, Line)
+                end,
+                V
+            ),
+
+            {[InputFile | InputFiles0], [Title | Titles0]}
         end,
-        orddict:fetch("peer_to_peer_throughput_state_based", Map)
+        {[], []},
+        Map
     ),
 
-    Result = run_gnuplot([InputFile], ["star block sync"], OutputFile),
+    Result = run_gnuplot(InputFiles, Titles, OutputFile),
     io:format("Generating transmission plot ~p. Output: ~p~n~n", [OutputFile, Result]).
+
+%% @private
+get_title("client_server_state_based_gcounter") -> "gcounter";
+get_title("client_server_state_based_gset") -> "gset";
+get_title("client_server_state_based_boolean") -> "boolean".
 
 %% @private
 root_log_dir() ->
