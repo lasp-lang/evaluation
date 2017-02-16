@@ -64,4 +64,4 @@ pretty(title) = system("echo ".title." | sed 's/_/ /g'")
 # Input file contains comma-separated values fields
 set datafile separator ","
 
-plot for [i=0:words(inputnames) - 1] word(inputnames, i + 1) using 1:2:3 with labels point ls i + 1 offset char 1,0 title pretty(word(titles, i + 1))
+plot for [i=0:words(inputnames) - 1] word(inputnames, i + 1) using 1:2:3 with linespoint ls i + 1 title pretty(word(titles, i + 1)), '' with labels offset char 1,0
