@@ -115,7 +115,9 @@ generate_plots(Simulation, EvalIds) ->
 %% @private
 get_title("client_server_state_based_gcounter") -> "gcounter";
 get_title("client_server_state_based_gset") -> "gset";
-get_title("client_server_state_based_boolean") -> "boolean".
+get_title("client_server_state_based_boolean") -> "boolean";
+get_title("client_server_state_based_twopset") -> "add-only twopset";
+get_title("client_server_state_based_awset_ps") -> "add-only provenance".
 
 %% @private
 root_log_dir() ->
