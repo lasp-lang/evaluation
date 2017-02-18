@@ -268,13 +268,15 @@ append_to_file(InputFile, Line) ->
 
 %% @doc Average all executions
 average_throughput_and_latency(ToAverage) ->
-    {NumberOfExecutions, TSum, LSum} = orddict:fold(
-        fun(_Timestamp, {TSec, LSec}, {CountAcc, TAcc, LAcc}) ->
-            {CountAcc + 1, TAcc + TSec, LAcc + LSec}
+    {NumberOfExecutions, TSum, TList, LSum} = orddict:fold(
+        fun(_Timestamp, {TSec, LSec}, {CountAcc, TAcc, TAccList, LAcc}) ->
+            {CountAcc + 1, TAcc + TSec, TAccList ++ [TSec], LAcc + LSec}
         end,
-        {0, 0, 0},
+        {0, 0, [], 0},
         ToAverage
     ),
+
+    io:format("[~p] ~p~n", [length(TList), TList]),
 
     {TSum / NumberOfExecutions, LSum / NumberOfExecutions}.
 
