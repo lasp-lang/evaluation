@@ -40,7 +40,7 @@ set output outputname
 set xlabel "ops/sec"
 set ylabel "latency (sec)"
 
-set key left top
+set key left bottom
 
 set datafile missing '0'
 
