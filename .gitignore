@@ -1,2 +1,4 @@
 .temp
 *.swp
+logs/
+plots/
