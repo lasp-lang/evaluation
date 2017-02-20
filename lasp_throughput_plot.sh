@@ -40,8 +40,8 @@ generate_plots(Simulation, EvalIds) ->
             ClientNumberIndex = length(Tokens) - 1,
             PartitionProbabilityIndex = length(Tokens),
             ClientNumber = lists:nth(ClientNumberIndex, Tokens),
-            PartitionProbability = lists:nth(PartitionProbabilityIndex, Tokens),
-            HeavyClients = lists:nth(1, Tokens) == "code",
+            _PartitionProbability = lists:nth(PartitionProbabilityIndex, Tokens),
+            _HeavyClients = lists:nth(1, Tokens) == "code",
             Id = string:join(lists:sublist(Tokens, IdMaxIndex), "_"),
 
             io:format("Analysing ~p~n", [EvalId]),
