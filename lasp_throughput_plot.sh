@@ -13,7 +13,7 @@ main(_) ->
         end,
         Simulations0
     ),
-            
+
     %% Generate plots
     lists:foreach(
         fun(Simulation) ->
@@ -46,8 +46,11 @@ generate_plots(Simulation, EvalIds) ->
             BlockingSync = lists:nth(BlockingSyncIndex, Tokens),
             StateInterval = lists:nth(StateIntervalIndex, Tokens),
             ClientNumber = lists:nth(ClientNumberIndex, Tokens),
-            PartitionProbability = lists:nth(PartitionProbabilityIndex, Tokens),
-            HeavyClients = lists:nth(1, Tokens) == "code",
+            _MaxEvents = lists:nth(MaxEventsIndex, Tokens),
+            _BlockingSync = lists:nth(BlockingSyncIndex, Tokens),
+            _StateInterval = lists:nth(StateIntervalIndex, Tokens),
+            _PartitionProbability = lists:nth(PartitionProbabilityIndex, Tokens),
+            _HeavyClients = lists:nth(1, Tokens) == "code",
             Id = string:join(lists:sublist(Tokens, IdMaxIndex), "_"),
 
             io:format("Analysing ~p~n", [EvalId]),
@@ -145,6 +148,8 @@ get_title(Id, K) ->
 get_title("client_server_state_based_gcounter") -> "gcounter";
 get_title("client_server_state_based_gset") -> "gset";
 get_title("client_server_state_based_boolean") -> "boolean";
+get_title("client_server_state_based_twopset") -> "add-only twopset";
+get_title("client_server_state_based_awset_ps") -> "add-only provenance";
 get_title({MaxEvents, true, _}) -> "blocking" ++ " e: " ++ integer_to_list(MaxEvents);
 get_title({MaxEvents, false, Interval}) -> integer_to_list(Interval) ++ " e: " ++ integer_to_list(MaxEvents).
 
@@ -183,7 +188,7 @@ only_csv_files(LogDir) ->
     %% Ignore not csv files
     lists:filter(
         fun(Elem) ->
-            case re:run(Elem, ".*.csv") of
+            case re:run(Elem, ".*.csv$") of
                 {match, _} ->
                     true;
                 nomatch ->
@@ -219,6 +224,8 @@ get_throughput_and_latency(EvalDir) ->
 get_single_throughput_and_latency(FilePath) ->
     %% Open log file
     {ok, FileDescriptor} = file:open(FilePath, [read]),
+
+    io:format("Processing file: ~p~n", [FilePath]),
 
     %% Ignore the first line
     [_ | Lines] = read_lines(FilePath, FileDescriptor),
@@ -269,6 +276,7 @@ get_single_throughput_and_latency(FilePath) ->
         true ->
             {true, 0, 0};
         false ->
+            io:format("TotalOps: ~p End: ~p, Start: ~p~n", [TotalOps, End, Start]),
             Diff = End - Start,
             T = TotalOps / (Diff / 1000),
             L = (BatchLatency / 1000) / BatchNumber,
@@ -297,13 +305,15 @@ append_to_file(InputFile, Line) ->
 
 %% @doc Average all executions
 average_throughput_and_latency(ToAverage) ->
-    {NumberOfExecutions, TSum, LSum} = orddict:fold(
-        fun(_Timestamp, {TSec, LSec}, {CountAcc, TAcc, LAcc}) ->
-            {CountAcc + 1, TAcc + TSec, LAcc + LSec}
+    {NumberOfExecutions, TSum, TList, LSum} = orddict:fold(
+        fun(_Timestamp, {TSec, LSec}, {CountAcc, TAcc, TAccList, LAcc}) ->
+            {CountAcc + 1, TAcc + TSec, TAccList ++ [TSec], LAcc + LSec}
         end,
-        {0, 0, 0},
+        {0, 0, [], 0},
         ToAverage
     ),
+
+    io:format("[~p] ~p~n", [length(TList), TList]),
 
     {TSum / NumberOfExecutions, LSum / NumberOfExecutions}.
 

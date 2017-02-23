@@ -40,7 +40,7 @@ set output outputname
 set xlabel "ops/sec"
 set ylabel "latency (sec)"
 
-set key left top
+set key left bottom
 
 set datafile missing '0'
 
@@ -52,6 +52,7 @@ set datafile missing '0'
 #                "10^-4" 0.0001)
 # set mytics 10
 
+set xrange [0:*]
 set yrange [0:*]
 
 # set xrange [0:60]
