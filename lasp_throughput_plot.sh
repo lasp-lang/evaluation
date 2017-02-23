@@ -13,7 +13,7 @@ main(_) ->
         end,
         Simulations0
     ),
-            
+
     %% Generate plots
     lists:foreach(
         fun(Simulation) ->
