@@ -36,9 +36,15 @@ generate_plots(Simulation, EvalIds) ->
     Map = lists:foldl(
         fun(EvalId, Acc) ->
             Tokens = string:tokens(EvalId, "_"),
-            IdMaxIndex = length(Tokens) - 2,
+            IdMaxIndex = length(Tokens) - 5,
+            MaxEventsIndex = length(Tokens) - 4,
+            BlockingSyncIndex = length(Tokens) - 3,
+            StateIntervalIndex = length(Tokens) - 2,
             ClientNumberIndex = length(Tokens) - 1,
             PartitionProbabilityIndex = length(Tokens),
+            MaxEvents = lists:nth(MaxEventsIndex, Tokens),
+            BlockingSync = lists:nth(BlockingSyncIndex, Tokens),
+            StateInterval = lists:nth(StateIntervalIndex, Tokens),
             ClientNumber = lists:nth(ClientNumberIndex, Tokens),
             PartitionProbability = lists:nth(PartitionProbabilityIndex, Tokens),
             HeavyClients = lists:nth(1, Tokens) == "code",
@@ -65,7 +71,18 @@ generate_plots(Simulation, EvalIds) ->
 
             Tuple = average_throughput_and_latency(T),
 
-            PerClients0 = case orddict:find(Id, Acc) of
+            MasterKey = {list_to_integer(MaxEvents),
+                         list_to_atom(BlockingSync),
+                         list_to_integer(StateInterval)},
+
+            PerIds0 = case orddict:find(MasterKey, Acc) of
+                {ok, PerIds} ->
+                    PerIds;
+                error ->
+                    orddict:new()
+            end,
+
+            PerClients0 = case orddict:find(Id, PerIds0) of
                 {ok, CPC} ->
                     CPC;
                 error ->
@@ -73,7 +90,8 @@ generate_plots(Simulation, EvalIds) ->
             end,
 
             PerClients1 = orddict:store(ClientNumber, Tuple, PerClients0),
-            orddict:store(Id, PerClients1, Acc)
+            PerIds1 = orddict:store(Id, PerClients1, PerIds0),
+            orddict:store(MasterKey, PerIds1, Acc)
         end,
         orddict:new(),
         EvalIds
@@ -86,24 +104,33 @@ generate_plots(Simulation, EvalIds) ->
     OutputFile = output_file(PlotDir, "throughput"),
 
     {InputFiles, Titles} = lists:foldl(
-        fun({Id, V}, {InputFiles0, Titles0}) ->
-            InputFile = PlotDir ++ Id,
-            Title = get_title(Id),
+        fun({{MaxEvents, BlockingSync, StateInterval}=K, PerId}, {InputFiles0, Titles0}) ->
+            lists:foldl(
+                fun({Id, PerClient}, {InputFiles1, Titles1}) ->
+                    Title = get_title(Id, K),
+                    InputFile = PlotDir ++ Id ++ "_"
+                             ++ integer_to_list(MaxEvents) ++ "_"
+                             ++ atom_to_list(BlockingSync) ++ "_"
+                             ++ integer_to_list(StateInterval),
             
-		        %% truncate file
-            write_to_file(InputFile, ""),
+		                %% truncate file
+                    write_to_file(InputFile, ""),
 
-            lists:foreach(
-                fun({ClientNumber, {T, L}}) ->
-                    Line = float_to_list(T) ++ ","
-                        ++ float_to_list(L) ++ ","
-                        ++ ClientNumber ++ "\n",
-                    append_to_file(InputFile, Line)
+                    lists:foreach(
+                        fun({ClientNumber, {T, L}}) ->
+                            Line = float_to_list(T) ++ ","
+                                ++ float_to_list(L) ++ ","
+                                ++ ClientNumber ++ "\n",
+                            append_to_file(InputFile, Line)
+                        end,
+                        PerClient
+                    ),
+
+                    {[InputFile | InputFiles0], [Title | Titles0]}
                 end,
-                V
-            ),
-
-            {[InputFile | InputFiles0], [Title | Titles0]}
+                {InputFiles0, Titles0},
+                PerId
+            )
         end,
         {[], []},
         Map
@@ -113,9 +140,13 @@ generate_plots(Simulation, EvalIds) ->
     io:format("Generating transmission plot ~p. Output: ~p~n~n", [OutputFile, Result]).
 
 %% @private
+get_title(Id, K) ->
+    get_title(Id) ++ " " ++ get_title(K).
 get_title("client_server_state_based_gcounter") -> "gcounter";
 get_title("client_server_state_based_gset") -> "gset";
-get_title("client_server_state_based_boolean") -> "boolean".
+get_title("client_server_state_based_boolean") -> "boolean";
+get_title({MaxEvents, true, _}) -> "blocking" ++ " e: " ++ integer_to_list(MaxEvents);
+get_title({MaxEvents, false, Interval}) -> integer_to_list(Interval) ++ " e: " ++ integer_to_list(MaxEvents).
 
 %% @private
 root_log_dir() ->
