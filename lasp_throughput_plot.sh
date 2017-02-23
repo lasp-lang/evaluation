@@ -36,10 +36,15 @@ generate_plots(Simulation, EvalIds) ->
     Map = lists:foldl(
         fun(EvalId, Acc) ->
             Tokens = string:tokens(EvalId, "_"),
-            IdMaxIndex = length(Tokens) - 2,
+            io:format("Found ~p tokens: ~p~n", [EvalId, Tokens]),
+            IdMaxIndex = length(Tokens) - 4,
+            BlockingSyncIndex = length(Tokens) - 3,
+            StateIntervalIndex = length(Tokens) - 2,
             ClientNumberIndex = length(Tokens) - 1,
             PartitionProbabilityIndex = length(Tokens),
             ClientNumber = lists:nth(ClientNumberIndex, Tokens),
+            _BlockingSync = lists:nth(BlockingSyncIndex, Tokens),
+            _StateInterval = lists:nth(StateIntervalIndex, Tokens),
             _PartitionProbability = lists:nth(PartitionProbabilityIndex, Tokens),
             _HeavyClients = lists:nth(1, Tokens) == "code",
             Id = string:join(lists:sublist(Tokens, IdMaxIndex), "_"),
