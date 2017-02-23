@@ -154,7 +154,7 @@ only_csv_files(LogDir) ->
     %% Ignore not csv files
     lists:filter(
         fun(Elem) ->
-            case re:run(Elem, ".*.csv") of
+            case re:run(Elem, ".*.csv$") of
                 {match, _} ->
                     true;
                 nomatch ->
