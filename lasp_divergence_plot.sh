@@ -221,9 +221,7 @@ get_throughput_latency_and_divergence(EvalDir) ->
     D = get_divergence(EvalDir),
 
     %% average divergence for this run
-    %% @todo Fix epsilon computation
-    %%       it should be only D instead of D / Count
-    {T, L / Count, D / Count}.
+    {T, L / Count, D}.
 
 %% @private
 get_single_throughput_and_latency(FilePath) ->
