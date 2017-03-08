@@ -36,7 +36,8 @@ generate_plots(Simulation, EvalIds) ->
     Map = lists:foldl(
         fun(EvalId, Acc) ->
             Tokens = string:tokens(EvalId, "_"),
-            IdMaxIndex = length(Tokens) - 5,
+            IdMaxIndex = length(Tokens) -6,
+            EventIntervalIndex = length(Tokens) - 5,
             MaxEventsIndex = length(Tokens) - 4,
             BlockingSyncIndex = length(Tokens) - 3,
             StateIntervalIndex = length(Tokens) - 2,
@@ -45,7 +46,7 @@ generate_plots(Simulation, EvalIds) ->
             MaxEvents = lists:nth(MaxEventsIndex, Tokens),
             BlockingSync = lists:nth(BlockingSyncIndex, Tokens),
             StateInterval = lists:nth(StateIntervalIndex, Tokens),
-            ClientNumber = lists:nth(ClientNumberIndex, Tokens),
+            ClientNumber = list_to_integer(lists:nth(ClientNumberIndex, Tokens)),
             _MaxEvents = lists:nth(MaxEventsIndex, Tokens),
             _BlockingSync = lists:nth(BlockingSyncIndex, Tokens),
             _StateInterval = lists:nth(StateIntervalIndex, Tokens),
@@ -123,7 +124,7 @@ generate_plots(Simulation, EvalIds) ->
                         fun({ClientNumber, {T, L}}) ->
                             Line = float_to_list(T) ++ ","
                                 ++ float_to_list(L) ++ ","
-                                ++ ClientNumber ++ "\n",
+                                ++ integer_to_list(ClientNumber) ++ "\n",
                             append_to_file(InputFile, Line)
                         end,
                         PerClient
@@ -143,15 +144,15 @@ generate_plots(Simulation, EvalIds) ->
     io:format("Generating transmission plot ~p. Output: ~p~n~n", [OutputFile, Result]).
 
 %% @private
-get_title(Id, K) ->
-    get_title(Id) ++ " " ++ get_title(K).
+get_title(_Id, K) ->
+    get_title(K).
 get_title("client_server_state_based_gcounter") -> "gcounter";
 get_title("client_server_state_based_gset") -> "gset";
 get_title("client_server_state_based_boolean") -> "boolean";
 get_title("client_server_state_based_twopset") -> "add-only twopset";
 get_title("client_server_state_based_awset_ps") -> "add-only provenance";
-get_title({MaxEvents, true, _}) -> "blocking" ++ " e: " ++ integer_to_list(MaxEvents);
-get_title({MaxEvents, false, Interval}) -> integer_to_list(Interval) ++ " e: " ++ integer_to_list(MaxEvents).
+get_title({_, true, _}) -> "blocking";
+get_title({_, false, Interval}) -> integer_to_list(Interval).
 
 %% @private
 root_log_dir() ->

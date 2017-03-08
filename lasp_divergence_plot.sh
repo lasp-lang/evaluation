@@ -36,7 +36,8 @@ generate_plots(Simulation, EvalIds) ->
     Map = lists:foldl(
         fun(EvalId, Acc) ->
             Tokens = string:tokens(EvalId, "_"),
-            IdMaxIndex = length(Tokens) - 5,
+            IdMaxIndex = length(Tokens) - 6,
+            EventIntervalIndex = length(Tokens) - 5,
             MaxEventsIndex = length(Tokens) - 4,
             BlockingSyncIndex = length(Tokens) - 3,
             StateIntervalIndex = length(Tokens) - 2,
@@ -45,7 +46,7 @@ generate_plots(Simulation, EvalIds) ->
             MaxEvents = lists:nth(MaxEventsIndex, Tokens),
             BlockingSync = lists:nth(BlockingSyncIndex, Tokens),
             StateInterval = lists:nth(StateIntervalIndex, Tokens),
-            ClientNumber = lists:nth(ClientNumberIndex, Tokens),
+            ClientNumber = list_to_integer(lists:nth(ClientNumberIndex, Tokens)),
             _MaxEvents = lists:nth(MaxEventsIndex, Tokens),
             _BlockingSync = lists:nth(BlockingSyncIndex, Tokens),
             _StateInterval = lists:nth(StateIntervalIndex, Tokens),
@@ -121,7 +122,7 @@ generate_plots(Simulation, EvalIds) ->
                         fun({ClientNumber, {T, _L, D}}) ->
                             Line = float_to_list(T) ++ ","
                                 ++ float_to_list(D) ++ ","
-                                ++ ClientNumber ++ "\n",
+                                ++ integer_to_list(ClientNumber) ++ "\n",
                             append_to_file(InputFile, Line)
                         end,
                         PerClient
@@ -383,7 +384,7 @@ generate_csv_for_r_analysis(PlotDir, Map) ->
         fun({{_, _, Interval}, [{_Sim, PerClients}]}) ->
             lists:foreach(
                 fun({ClientNumber, {T, L, D}}) ->
-                    List = [ClientNumber,
+                    List = [integer_to_list(ClientNumber),
                             integer_to_list(Interval),
                             float_to_list(T),
                             float_to_list(L),
