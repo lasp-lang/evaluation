@@ -3,7 +3,7 @@
 -author("Vitor Enes Duarte <vitorenesduarte@gmail.com>").
 
 main(_) ->
-    ValidDirectories = ordsets:from_list(["throughput"]),
+    ValidDirectories = ordsets:from_list(["throughput", "divergence"]),
 
     %% Filter out invalid directories
     Simulations0 = only_dirs(root_log_dir()),
@@ -129,7 +129,7 @@ generate_plots(Simulation, EvalIds) ->
                         PerClient
                     ),
 
-                    {[InputFile | InputFiles0], [Title | Titles0]}
+                    {[InputFile | InputFiles1], [Title | Titles1]}
                 end,
                 {InputFiles0, Titles0},
                 PerId
