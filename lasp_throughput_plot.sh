@@ -225,7 +225,7 @@ get_single_throughput_and_latency(FilePath) ->
     %% Open log file
     {ok, FileDescriptor} = file:open(FilePath, [read]),
 
-    io:format("Processing file: ~p~n", [FilePath]),
+    %io:format("Processing file: ~p~n", [FilePath]),
 
     %% Ignore the first line
     [_ | Lines] = read_lines(FilePath, FileDescriptor),
@@ -276,7 +276,8 @@ get_single_throughput_and_latency(FilePath) ->
         true ->
             {true, 0, 0};
         false ->
-            io:format("TotalOps: ~p End: ~p, Start: ~p~n", [TotalOps, End, Start]),
+            %io:format("TotalOps: ~p End: ~p, Start: ~p~n", [TotalOps, End, Start]),
+
             Diff = End - Start,
             T = TotalOps / (Diff / 1000),
             L = (BatchLatency / 1000) / BatchNumber,
@@ -313,7 +314,7 @@ average_throughput_and_latency(ToAverage) ->
         ToAverage
     ),
 
-    io:format("[~p] ~p~n", [length(TList), TList]),
+    %io:format("[~p] ~p~n", [length(TList), TList]),
 
     {TSum / NumberOfExecutions, LSum / NumberOfExecutions}.
 

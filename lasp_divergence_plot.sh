@@ -60,7 +60,7 @@ generate_plots(Simulation, EvalIds) ->
             T = lists:foldl(
                 fun(EvalTimestamp, ToAverage0) ->
                     EvalDir = EvalIdDir ++ "/" ++ EvalTimestamp,
-                    Tuple = get_throughput_and_divergence(EvalDir),
+                    Tuple = get_throughput_latency_and_divergence(EvalDir),
 
                     orddict:store(
                         EvalTimestamp,
@@ -72,7 +72,7 @@ generate_plots(Simulation, EvalIds) ->
                 EvalTimestamps
             ),
 
-            Tuple = average_throughput_and_latency(T),
+            Tuple = average(T),
 
             MasterKey = {list_to_integer(MaxEvents),
                          list_to_atom(BlockingSync),
@@ -100,8 +100,6 @@ generate_plots(Simulation, EvalIds) ->
         EvalIds
     ),
 
-    io:format("~p~n", [Map]),
-
     PlotDir = root_plot_dir() ++ "/" ++ Simulation ++ "/",
     filelib:ensure_dir(PlotDir),
     OutputFile = output_file(PlotDir, "divergence"),
@@ -120,9 +118,9 @@ generate_plots(Simulation, EvalIds) ->
                     write_to_file(InputFile, ""),
 
                     lists:foreach(
-                        fun({ClientNumber, {T, L}}) ->
+                        fun({ClientNumber, {T, _L, D}}) ->
                             Line = float_to_list(T) ++ ","
-                                ++ float_to_list(L) ++ ","
+                                ++ float_to_list(D) ++ ","
                                 ++ ClientNumber ++ "\n",
                             append_to_file(InputFile, Line)
                         end,
@@ -139,19 +137,20 @@ generate_plots(Simulation, EvalIds) ->
         Map
     ),
 
+    generate_csv_for_r_analysis(PlotDir, Map),
+
     Result = run_gnuplot(InputFiles, Titles, OutputFile),
     io:format("Generating transmission plot ~p. Output: ~p~n~n", [OutputFile, Result]).
 
 %% @private
-get_title(Id, K) ->
-    get_title(Id) ++ " " ++ get_title(K).
+get_title(_Id, K) -> get_title(K).
 get_title("client_server_state_based_gcounter") -> "gcounter";
 get_title("client_server_state_based_gset") -> "gset";
 get_title("client_server_state_based_boolean") -> "boolean";
 get_title("client_server_state_based_twopset") -> "add-only twopset";
 get_title("client_server_state_based_awset_ps") -> "add-only provenance";
-get_title({MaxEvents, true, _}) -> "blocking" ++ " e: " ++ integer_to_list(MaxEvents);
-get_title({MaxEvents, false, Interval}) -> integer_to_list(Interval) ++ " e: " ++ integer_to_list(MaxEvents).
+get_title({_, true, _}) -> "blocking";
+get_title({_, false, Interval}) -> integer_to_list(Interval).
 
 %% @private
 root_log_dir() ->
@@ -199,35 +198,38 @@ only_csv_files(LogDir) ->
     ).
 
 %% @private
-get_throughput_and_divergence(EvalDir) ->
+get_throughput_latency_and_divergence(EvalDir) ->
     LogFiles = only_csv_files(EvalDir),
-    {Count, T} = lists:foldl(
-        fun(File, {CAcc, TAcc}=Acc) ->
+    {Count, T, L} = lists:foldl(
+        fun(File, {CAcc, TAcc, LAcc}=Acc) ->
             FilePath = EvalDir ++ "/" ++ File,
-            {Ignore, T0} = get_single_throughput(FilePath),
+            {Ignore, T0, L0} =
+                get_single_throughput_and_latency(FilePath),
 
             case Ignore of
                 true ->
                     Acc;
                 false ->
-                    {CAcc + 1, TAcc + T0}
+                    {CAcc + 1, TAcc + T0, LAcc + L0}
             end
         end,
-        {0, 0},
+        {0, 0, 0},
         LogFiles
     ),
 
     D = get_divergence(EvalDir),
 
     %% average divergence for this run
-    {T, D / Count}.
+    %% @todo Fix epsilon computation
+    %%       it should be only D instead of D / Count
+    {T, L / Count, D / Count}.
 
 %% @private
-get_single_throughput(FilePath) ->
+get_single_throughput_and_latency(FilePath) ->
     %% Open log file
     {ok, FileDescriptor} = file:open(FilePath, [read]),
 
-    io:format("Processing file: ~p~n", [FilePath]),
+    %io:format("Processing file: ~p~n", [FilePath]),
 
     %% Ignore the first line
     [_ | Lines] = read_lines(FilePath, FileDescriptor),
@@ -249,7 +251,7 @@ get_single_throughput(FilePath) ->
         Lines
     ),
 
-    {Start, End, TotalOps, _BatchNumber, _BatchLatency} = lists:foldl(
+    {Start, End, TotalOps, BatchNumber, BatchLatency} = lists:foldl(
         fun(Line, {Start0, _End0, TotalOps0, BatchNumber0, BatchLatency0}) ->
             [BatchStartMs, BatchEndMs, Ops, Ms] = string:tokens(Line, ","),
 
@@ -276,13 +278,13 @@ get_single_throughput(FilePath) ->
 
     case Ignore of
         true ->
-            {true, 0};
+            {true, 0, 0};
         false ->
-            io:format("TotalOps: ~p End: ~p, Start: ~p~n", [TotalOps, End, Start]),
+            %io:format("TotalOps: ~p End: ~p, Start: ~p~n", [TotalOps, End, Start]),
             Diff = End - Start,
             T = TotalOps / (Diff / 1000),
-            %L = (BatchLatency / 1000) / BatchNumber,
-            {Ignore, T}
+            L = (BatchLatency / 1000) / BatchNumber,
+            {Ignore, T, L}
     end.
 
 %% @private
@@ -314,18 +316,18 @@ append_to_file(InputFile, Line) ->
     file:write_file(InputFile, Line, [append]).
 
 %% @doc Average all executions
-average_throughput_and_latency(ToAverage) ->
-    {NumberOfExecutions, TSum, TList, LSum} = orddict:fold(
-        fun(_Timestamp, {TSec, LSec}, {CountAcc, TAcc, TAccList, LAcc}) ->
-            {CountAcc + 1, TAcc + TSec, TAccList ++ [TSec], LAcc + LSec}
+average(ToAverage) ->
+    {NumberOfExecutions, TSum, TList, LSum, DSum} = orddict:fold(
+        fun(_Timestamp, {TSec, LSec, DSec}, {CountAcc, TAcc, TAccList, LAcc, DAcc}) ->
+            {CountAcc + 1, TAcc + TSec, TAccList ++ [TSec], LAcc + LSec, DAcc + DSec}
         end,
-        {0, 0, [], 0},
+        {0, 0, [], 0, 0},
         ToAverage
     ),
 
     io:format("[~p] ~p~n", [length(TList), TList]),
 
-    {TSum / NumberOfExecutions, LSum / NumberOfExecutions}.
+    {TSum / NumberOfExecutions, LSum / NumberOfExecutions, DSum / NumberOfExecutions}.
 
 %% @private
 run_gnuplot(InputFiles, Titles, OutputFile) ->
@@ -367,3 +369,30 @@ join_titles(Titles) ->
         Titles
     ),
     string:strip(Line).
+
+%% @private
+generate_csv_for_r_analysis(PlotDir, Map) ->
+    File = PlotDir ++ "r.csv",
+
+    Header = "N,I,T,L,E\n",
+
+    %% truncate file
+    write_to_file(File, Header),
+
+    lists:foreach(
+        fun({{_, _, Interval}, [{_Sim, PerClients}]}) ->
+            lists:foreach(
+                fun({ClientNumber, {T, L, D}}) ->
+                    List = [ClientNumber,
+                            integer_to_list(Interval),
+                            float_to_list(T),
+                            float_to_list(L),
+                            float_to_list(D)],
+                    Line = lists:flatten(lists:join(",", List)) ++ "\n",
+                    append_to_file(File, Line)
+                end,
+                PerClients
+            )
+        end,
+        Map
+    ).

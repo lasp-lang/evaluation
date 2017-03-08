@@ -40,7 +40,7 @@ set output outputname
 set xlabel "ops/sec"
 set ylabel "epsilon"
 
-set key left bottom
+set key right top
 
 set datafile missing '0'
 
