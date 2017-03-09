@@ -38,7 +38,7 @@ set style line 8 pt 7
 
 set output outputname
 set xlabel "ops/sec"
-set ylabel "epsilon"
+set ylabel "epsilon (%)"
 
 set key left top
 
