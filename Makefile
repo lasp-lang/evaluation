@@ -1,11 +1,17 @@
 .PHONY: plots check
 
-check: plots
+check: divergence throughput
 
 plots: clean transmission memory contraction overcounting partition-overcounting
 
 clean:
 	rm -rf plots/
+
+divergence:
+	./lasp_divergence_plot.sh
+
+throughput:
+	./lasp_throughput_plot.sh
 
 transmission:
 	./lasp_transmission_plot.sh

@@ -391,65 +391,65 @@ revert_tuple_order(LastKnown) ->
         LastKnown
     ).
 
-%% @private
-generate_per_node_plot(Map, PlotDir) ->
-    {Titles, InputFiles} = write_per_node_to_files(Map, PlotDir),
-    OutputFile = output_file(PlotDir, "per_node"),
-    %% This plot does not show the convergence time per node,
-    %% thus the -1
-    Result = run_gnuplot(InputFiles, Titles, OutputFile, -100),
-    io:format("Generating per node plot ~p. Output: ~p~n~n", [OutputFile, Result]),
+% %% @private
+% generate_per_node_plot(Map, PlotDir) ->
+%     {Titles, InputFiles} = write_per_node_to_files(Map, PlotDir),
+%     OutputFile = output_file(PlotDir, "per_node"),
+%     %% This plot does not show the convergence time per node,
+%     %% thus the -1
+%     Result = run_gnuplot(InputFiles, Titles, OutputFile, -100),
+%     io:format("Generating per node plot ~p. Output: ~p~n~n", [OutputFile, Result]),
 
-    %% Remove input files
-    delete_files(InputFiles).
+%     %% Remove input files
+%     delete_files(InputFiles).
 
-%% @private
-write_per_node_to_files(Map, PlotDir) ->
-    InputFileToTitle = orddict:fold(
-        fun(FileLogPath, TimeToLogs, InputFileToTitle0) ->
-            NodeName = node_name(FileLogPath),
+% %% @private
+% write_per_node_to_files(Map, PlotDir) ->
+%     InputFileToTitle = orddict:fold(
+%         fun(FileLogPath, TimeToLogs, InputFileToTitle0) ->
+%             NodeName = node_name(FileLogPath),
 
-            orddict:fold(
-                fun(Time, Logs, InputFileToTitle1) ->
-                    lists:foldl(
-                        fun({Bytes, Type}, InputFileToTitle2) ->
-                            Title = atom_to_list(Type) ++ "_" ++ NodeName,
-                            InputFile = PlotDir ++ Title ++ ".csv",
-                            append_to_file(InputFile, Time, Bytes),
+%             orddict:fold(
+%                 fun(Time, Logs, InputFileToTitle1) ->
+%                     lists:foldl(
+%                         fun({Bytes, Type}, InputFileToTitle2) ->
+%                             Title = atom_to_list(Type) ++ "_" ++ NodeName,
+%                             InputFile = PlotDir ++ Title ++ ".csv",
+%                             append_to_file(InputFile, Time, Bytes),
 
-                            case orddict:find(InputFile, InputFileToTitle2) of
-                                {ok, _} ->
-                                    InputFileToTitle2;
-                                error ->
-                                    orddict:store(InputFile, Title, InputFileToTitle2)
-                            end
-                        end,
-                        InputFileToTitle1,
-                        Logs
-                    )
-                end,
-                InputFileToTitle0,
-                TimeToLogs
-            )
-        end,
-        orddict:new(),
-        Map
-    ),
+%                             case orddict:find(InputFile, InputFileToTitle2) of
+%                                 {ok, _} ->
+%                                     InputFileToTitle2;
+%                                 error ->
+%                                     orddict:store(InputFile, Title, InputFileToTitle2)
+%                             end
+%                         end,
+%                         InputFileToTitle1,
+%                         Logs
+%                     )
+%                 end,
+%                 InputFileToTitle0,
+%                 TimeToLogs
+%             )
+%         end,
+%         orddict:new(),
+%         Map
+%     ),
 
-    {Titles, InputFiles} = orddict:fold(
-        fun(InputFile, Title, {Titles0, InputFiles0}) ->
-            {[Title | Titles0], [InputFile | InputFiles0]}
-        end,
-        {[], []},
-        InputFileToTitle
-    ),
-    {Titles, InputFiles}.
+%     {Titles, InputFiles} = orddict:fold(
+%         fun(InputFile, Title, {Titles0, InputFiles0}) ->
+%             {[Title | Titles0], [InputFile | InputFiles0]}
+%         end,
+%         {[], []},
+%         InputFileToTitle
+%     ),
+%     {Titles, InputFiles}.
 
-%% @private
-node_name(FileLogPath) ->
-    Tokens = string:tokens(FileLogPath, "\/\."),
-    NodeName = lists:nth(6, Tokens),
-    re:replace(NodeName, "@", "_", [global, {return, list}]).
+% %% @private
+% node_name(FileLogPath) ->
+%     Tokens = string:tokens(FileLogPath, "\/\."),
+%     NodeName = lists:nth(6, Tokens),
+%     re:replace(NodeName, "@", "_", [global, {return, list}]).
 
 %% @private
 generate_nodes_average_plot(Types, Times, Map, ConvergenceTime, PlotDir) ->

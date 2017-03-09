@@ -109,13 +109,13 @@ generate_plots(Simulation, EvalIds) ->
     {InputFiles, Titles} = lists:foldl(
         fun({{MaxEvents, BlockingSync, StateInterval}=K, PerId}, {InputFiles0, Titles0}) ->
             lists:foldl(
-                fun({Id, PerClient}, {InputFiles1, Titles1}) ->
+                fun({Id, PerClient}, {_InputFiles1, _Titles1}) ->
                     Title = get_title(Id, K),
                     InputFile = PlotDir ++ Id ++ "_"
                              ++ integer_to_list(MaxEvents) ++ "_"
                              ++ atom_to_list(BlockingSync) ++ "_"
                              ++ integer_to_list(StateInterval),
-            
+
 		                %% truncate file
                     write_to_file(InputFile, ""),
 
