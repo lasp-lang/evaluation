@@ -43,6 +43,7 @@ generate_plots(Simulation, EvalIds) ->
             StateIntervalIndex = length(Tokens) - 2,
             ClientNumberIndex = length(Tokens) - 1,
             PartitionProbabilityIndex = length(Tokens),
+            EventInterval = lists:nth(EventIntervalIndex, Tokens),
             MaxEvents = lists:nth(MaxEventsIndex, Tokens),
             BlockingSync = lists:nth(BlockingSyncIndex, Tokens),
             StateInterval = lists:nth(StateIntervalIndex, Tokens),
@@ -61,7 +62,7 @@ generate_plots(Simulation, EvalIds) ->
             T = lists:foldl(
                 fun(EvalTimestamp, ToAverage0) ->
                     EvalDir = EvalIdDir ++ "/" ++ EvalTimestamp,
-                    Tuple = get_throughput_latency_and_divergence(EvalDir),
+                    Tuple = get_throughput_latency_and_divergence(EvalDir, EventInterval),
 
                     orddict:store(
                         EvalTimestamp,
@@ -199,13 +200,13 @@ only_csv_files(LogDir) ->
     ).
 
 %% @private
-get_throughput_latency_and_divergence(EvalDir) ->
+get_throughput_latency_and_divergence(EvalDir, EventInterval) ->
     LogFiles = only_csv_files(EvalDir),
     {Count, T, L} = lists:foldl(
         fun(File, {CAcc, TAcc, LAcc}=Acc) ->
             FilePath = EvalDir ++ "/" ++ File,
             {Ignore, T0, L0} =
-                get_single_throughput_and_latency(FilePath),
+                get_single_throughput_and_latency(FilePath, EventInterval),
 
             case Ignore of
                 true ->
@@ -220,11 +221,11 @@ get_throughput_latency_and_divergence(EvalDir) ->
 
     D = get_divergence(EvalDir),
 
-    %% average divergence for this run
+    %% average latency for this run
     {T, L / Count, D}.
 
 %% @private
-get_single_throughput_and_latency(FilePath) ->
+get_single_throughput_and_latency(FilePath, EventInterval) ->
     %% Open log file
     {ok, FileDescriptor} = file:open(FilePath, [read]),
 
@@ -263,12 +264,16 @@ get_single_throughput_and_latency(FilePath) ->
                     Start0
             end,
 
+            BatchSize = list_to_integer(Ops),
+            TotalBatchTime = list_to_integer(Ms),
+            Latency = (TotalBatchTime - ((BatchSize - 1) * list_to_integer(EventInterval))) / BatchSize,
+
             {
              Start1,
              list_to_integer(BatchEndMs),
-             TotalOps0 + list_to_integer(Ops),
-             BatchNumber0 + 1, 
-             BatchLatency0 + (list_to_integer(Ms) / list_to_integer(Ops))
+             TotalOps0 + BatchSize,
+             BatchNumber0 + 1,
+             BatchLatency0 + Latency
             }
         end,
         {undefined, undefined, 0, 0, 0},
