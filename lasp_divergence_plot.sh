@@ -266,7 +266,7 @@ get_single_throughput_and_latency(FilePath, EventInterval) ->
 
             BatchSize = list_to_integer(Ops),
             TotalBatchTime = list_to_integer(Ms),
-            Latency = TotalBatchTime - ((BatchSize - 1) * list_to_integer(EventInterval) / BatchSize),
+            Latency = (TotalBatchTime - ((BatchSize - 1) * list_to_integer(EventInterval))) / BatchSize,
 
             {
              Start1,
