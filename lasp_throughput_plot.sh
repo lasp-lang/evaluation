@@ -219,7 +219,7 @@ get_throughput_and_latency(EvalDir, EventInterval) ->
         LogFiles
     ),
 
-    %% average throughput and latency for this run
+    %% average latency for this run
     {T, L / Count}.
 
 %% @private
@@ -269,7 +269,7 @@ get_single_throughput_and_latency(FilePath, EventInterval) ->
             {
              Start1,
              list_to_integer(BatchEndMs),
-             TotalOps0 + list_to_integer(Ops),
+             TotalOps0 + BatchSize,
              BatchNumber0 + 1, 
              BatchLatency0 + Latency
             }
