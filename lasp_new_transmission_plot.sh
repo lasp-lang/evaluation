@@ -55,6 +55,7 @@ generate_plots(Simulation, EvalIds) ->
                             T = lists:foldl(
                                 fun(EvalTimestamp, ToAverage0) ->
                                     EvalDir = EvalIdDir ++ "/" ++ EvalTimestamp,
+                                    io:format("Analysing ~p~n", [EvalDir]),
                                     %% Before
                                     %% {ServerMB, ClientsMB} = get_server_and_clients_mb(EvalDir),
                                     %% Now
@@ -101,9 +102,27 @@ generate_plots(Simulation, EvalIds) ->
     InputFile = PlotDir ++ "transmission",
     OutputFile = output_file(PlotDir, "transmission"),
 
-    Header = "ABCXYZ,64_s,64_d,64_o,128_s,128_d,128_o,256_s,256_d,256_o,512_s,512_d,512_o,1024_s,1024_d,1024_o\n",
-    L1 = io_lib:format("state-based,~w,~w,~w,~w,~w,~w,~w,~w,~w,~w,~w,~w,~w,~w,~w\n",
+    Header = "ABCXYZ,32_s,32_d,32_o,64_s,64_d,64_o,128_s,128_d,128_o,256_s,256_d,256_o\n",
+    L1 = io_lib:format("dc-state,~w,~w,~w,~w,~w,~w,~w,~w,~w,~w,~w,~w\n",
                        [
+                        gb(element(1, orddict:fetch("32", orddict:fetch("client_server_state_based_with_aae_test", Map)))),
+                        0,
+                        0,
+                        gb(element(1, orddict:fetch("64", orddict:fetch("client_server_state_based_with_aae_test", Map)))),
+                        0,
+                        0,
+                        gb(element(1, orddict:fetch("128", orddict:fetch("client_server_state_based_with_aae_test", Map)))),
+                        0,
+                        0,
+                        gb(element(1, orddict:fetch("256", orddict:fetch("client_server_state_based_with_aae_test", Map)))),
+                        0,
+                        0
+                       ]),
+    L2 = io_lib:format("hg-state,~w,~w,~w,~w,~w,~w,~w,~w,~w,~w,~w,~w\n",
+                       [
+                        gb(element(1, orddict:fetch("32", orddict:fetch("peer_to_peer_state_based_with_aae_test", Map)))),
+                        0,
+                        0,
                         gb(element(1, orddict:fetch("64", orddict:fetch("peer_to_peer_state_based_with_aae_test", Map)))),
                         0,
                         0,
@@ -112,16 +131,13 @@ generate_plots(Simulation, EvalIds) ->
                         0,
                         gb(element(1, orddict:fetch("256", orddict:fetch("peer_to_peer_state_based_with_aae_test", Map)))),
                         0,
-                        0,
-                        gb(element(1, orddict:fetch("512", orddict:fetch("peer_to_peer_state_based_with_aae_test", Map)))),
-                        0,
-                        0,
-                        gb(element(1, orddict:fetch("1024", orddict:fetch("peer_to_peer_state_based_with_aae_test", Map)))),
-                        0,
                         0
                        ]),
-    L2 = io_lib:format("delta-based,~w,~w,~w,~w,~w,~w,~w,~w,~w,~w,~w,~w,~w,~w,~w\n",
+    L3 = io_lib:format("hg-delta,~w,~w,~w,~w,~w,~w,~w,~w,~w,~w,~w,~w\n",
                        [
+                        gb(element(1, orddict:fetch("32", orddict:fetch("peer_to_peer_delta_based_with_aae_test", Map)))),
+                        0,
+                        0,
                         gb(element(1, orddict:fetch("64", orddict:fetch("peer_to_peer_delta_based_with_aae_test", Map)))),
                         0,
                         0,
@@ -129,12 +145,6 @@ generate_plots(Simulation, EvalIds) ->
                         0,
                         0,
                         gb(element(1, orddict:fetch("256", orddict:fetch("peer_to_peer_delta_based_with_aae_test", Map)))),
-                        0,
-                        0,
-                        gb(element(1, orddict:fetch("512", orddict:fetch("peer_to_peer_delta_based_with_aae_test", Map)))),
-                        0,
-                        0,
-                        gb(element(1, orddict:fetch("1024", orddict:fetch("peer_to_peer_delta_based_with_aae_test", Map)))),
                         0,
                         0
                        ]),
@@ -144,6 +154,7 @@ generate_plots(Simulation, EvalIds) ->
     append_to_file(InputFile, Header),
     append_to_file(InputFile, L1),
     append_to_file(InputFile, L2),
+    append_to_file(InputFile, L3),
 
     Result = run_gnuplot(InputFile, OutputFile),
     io:format("Generating transmission plot ~p. Output: ~p~n~n", [OutputFile, Result]).
@@ -232,7 +243,7 @@ get_state_and_protocol_transmission(FilePath) ->
         Lines
     ),
 
-    lists:foldl(
+    Result = lists:foldl(
         fun({LogType, Bytes}, {StateAcc, DisseminationAcc, OverlayAcc}) ->
             case log_type(LogType) of
                 state ->
@@ -247,7 +258,11 @@ get_state_and_protocol_transmission(FilePath) ->
         end,
         {0, 0, 0},
         LogTypeToLastBytes
-    ).
+    ),
+
+    file:close(FileDescriptor),
+
+    Result.
 
 %% @private
 log_type(memory) -> ignore;
