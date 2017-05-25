@@ -29,7 +29,7 @@ set linetype 3 lc rgb "#5060D0"
 set linetype 4 lc rgb "#F25900"
 set datafile separator ","
 set output outputname
-plot newhistogram "32", inputname using "32_s":xtic(1) t 'State' lc 3, \
-     newhistogram "64", '' u "64_s":xtic(1) t '' lc 3, \
-     newhistogram "128", '' u "128_s":xtic(1) t '' lc 3, \
-     newhistogram "256", '' u "256_s":xtic(1) t '' lc 3
+plot newhistogram "32", inputname using "32_s":xtic(1) t 'State' lc 3, '' u "32_p" t 'Protocol' lc 4, \
+     newhistogram "64", '' u "64_s":xtic(1) t '' lc 3, '' u "64_p" t '' lc 4, \
+     newhistogram "128", '' u "128_s":xtic(1) t '' lc 3, '' u "128_p" t '' lc 4, \
+     newhistogram "256", '' u "256_s":xtic(1) t '' lc 3, '' u "256_p" t '' lc 4
